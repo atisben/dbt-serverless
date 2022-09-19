@@ -1,5 +1,9 @@
 # dbt-serverless
 
+## Before starting
+Make sure a dbt `profile.yml` has been uploaded to the service/profiles/ directory
+
+
 ## Google cloud authentication
 
 Run the following command
@@ -42,4 +46,14 @@ pip install -r service/requirements.txt
 ```sh
 cd service
 PORT=8081 python main.py
+```
+
+## Usage
+
+Run dbt locally
+
+```sh
+dbt run \
+--profiles-dir ../profiles/ \
+--project-dir <project-directory> 
 ```

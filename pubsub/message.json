@@ -1,0 +1,7 @@
+
+{
+    "url": "test",
+    "cli": "test-cli",
+    "--profiles-dir": "profiles_dir",
+    "--project-dir": "project_dir"
+}
