@@ -7,13 +7,23 @@ resource "google_pubsub_topic" "topic" {
 resource "google_cloud_scheduler_job" "job" {
   name        = "dbt-trigger"
   description = "trigger the dbt processing"
-  schedule    = "*/2 * * * *"
+  time_zone   = "Europe/Paris"
+  region      = var.region
+  schedule    = "0 6 * * *"
 
   pubsub_target {
     # topic.id is the topic's full resource name.
     topic_name = google_pubsub_topic.topic.id
-    data       = filebase64("./pubsub/message.json")
+    data       = base64encode(jsonencode({
+      "url"="${google_cloud_run_service.dbt.status[0].url}/test",
+      "cli"="run",
+      "--profiles-dir"="profiles",
+      "--project-dir"="${var.dbt_project_dir}"
+      }))
   }
+  depends_on = [
+    google_cloud_run_service.dbt
+  ]
 }
 
 
@@ -24,10 +34,10 @@ resource "google_cloudfunctions_function" "function" {
   runtime     = "python37"
   region      = var.region
 
-  available_memory_mb   = 128
+  available_memory_mb   = 512
   source_archive_bucket = google_storage_bucket.source.name
   source_archive_object = google_storage_bucket_object.archive.name
-  entry_point           = "run"
+  entry_point           = "pubsub_trigger"
   service_account_email = google_service_account.dbt_worker.email
 
   event_trigger {
@@ -46,7 +56,7 @@ resource "google_storage_bucket" "source" {
 # Create a fresh archive of the current function folder
 data "archive_file" "function" {
   type        = "zip"
-  output_path = "temp/function_code_${timestamp()}.zip"
+  output_path = "temp/function_code_${formatdate("YYYYMMDDhhmmss", timestamp())}.zip"
   source_dir  = local.function_folder
 }
 

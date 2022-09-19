@@ -3,13 +3,9 @@ import subprocess
 import os
 
 
-##TODO add environment variable for test
-os.environ["DBT_PROJECT_DIR"] = "dbt_process"
-os.environ["DBT_PROFILEs_DIR"] = "profiles"
-
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
     return render_template("index.html")
 

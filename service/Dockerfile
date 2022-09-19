@@ -8,8 +8,8 @@ ENV DBT_PROJECT_DIR ${APP_HOME}/dbt_process
 WORKDIR ${APP_HOME}
 COPY dbt_process/ ${DBT_PROJECT_DIR}/
 COPY profiles/profiles.yml ${DBT_PROFILES_DIR}/
-COPY static/ .
-COPY templates/ .
+COPY static/ static/
+COPY templates/ templates/
 
 # Install dependencies
 COPY requirements.txt .

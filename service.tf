@@ -33,22 +33,11 @@ resource "google_cloud_run_service" "dbt" {
   depends_on = [google_project_service.run]
 }
 
-# Set service public
+# Set service access
+resource "google_cloud_run_service_iam_binding" "binding" {
+  location = google_cloud_run_service.dbt.location
+  service = google_cloud_run_service.dbt.name
+  role = "roles/run.invoker"
+  members = ["serviceAccount:${google_service_account.dbt_worker.email}"]
+}
 
-# data "google_iam_policy" "noauth" {
-#   binding {
-#     role = "roles/run.invoker"
-#     members = [
-#       "allUsers",
-#     ]
-#   }
-# }
-
-# resource "google_cloud_run_service_iam_policy" "noauth" {
-#   location = google_cloud_run_service.dbt.location
-#   project  = google_cloud_run_service.dbt.project
-#   service  = google_cloud_run_service.dbt.name
-
-#   policy_data = data.google_iam_policy.noauth.policy_data
-#   depends_on  = [google_cloud_run_service.dbt]
-# }
