@@ -29,10 +29,10 @@ Run the following command
 Cloud Build is used to create a container in Container Registry.
 
 Run the following command to push the docker image to gcr
+
 ```sh
-    gcloud builds submit . \
-    --config=./services/cloudbuild.yaml \
-    --project <my_project>
+gcloud builds submit \
+--project <my_project>
 ```
 
 ## Terraform 
