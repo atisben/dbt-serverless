@@ -1,0 +1,13 @@
+dbt_process:
+  outputs:
+    dev:
+      dataset: dev
+      job_execution_timeout_seconds: 300
+      job_retries: 1
+      location: EU
+      method: oauth
+      priority: interactive
+      project: serverless-dbt-362814
+      threads: 4
+      type: bigquery
+  target: dev

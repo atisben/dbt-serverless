@@ -37,7 +37,7 @@ resource "google_cloudfunctions_function" "function" {
   available_memory_mb   = 512
   source_archive_bucket = google_storage_bucket.source.name
   source_archive_object = google_storage_bucket_object.archive.name
-  entry_point           = "pubsub_trigger"
+  entry_point           = "pubsub_to_cloudrun"
   service_account_email = google_service_account.dbt_worker.email
 
   event_trigger {

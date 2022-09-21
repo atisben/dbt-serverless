@@ -6,9 +6,9 @@ import requests
 import base64
 import google.auth.transport.requests
 import google.oauth2.id_token
-import urllib
+import re
 
-def make_authorized_header(endpoint, audience):
+def make_authorized_header(audience):
     """
     make_authorized_header makes a header for the specified HTTP endpoint
     by authenticating with the ID token obtained from the google-auth client library
@@ -19,25 +19,25 @@ def make_authorized_header(endpoint, audience):
     # audience = https://project-region-projectid.cloudfunctions.net/myFunction
     # For Cloud Functions, `endpoint` and `audience` should be equal
 
-    req = urllib.request.Request(endpoint)
     auth_req = google.auth.transport.requests.Request()
     id_token = google.oauth2.id_token.fetch_id_token(auth_req, audience)
 
     header= {"Authorization": f"Bearer {id_token}"}
+
     return header
 
 
 def read_pubsub_metadata(event, context):
     msg = base64.b64decode(event['data']).decode('utf-8')
     try: 
-        request_json = json.loads(msg)
+        pubsub_req = json.loads(msg)
     except ValueError as e:
         print(f"Error decoding JSON: {e}")
         return "JSON Error", 400
 
-    return request_json
+    return pubsub_req
 
-def pubsub_trigger(event, context):
+def start_check():
 
     #TODO define env variables
     PROJECT_ID = os.getenv('PROJECT_ID')
@@ -49,16 +49,30 @@ def pubsub_trigger(event, context):
 
     directory = Directory(bigquery_client,PROJECT_ID, "dev")
     table = Table(bigquery_client, directory, "my_first_dbt_model")
-    table.check_if_exist()
+    return(table.check_if_exist())
 
-    # Read metadata from pubSub
+
+def pubsub_to_cloudrun(event, context):
+
+    # Read metadata from pubSub message
     metadata = read_pubsub_metadata(event, context)
     endpoint = metadata.get('endpoint')
-    headers = make_authorized_header(endpoint=endpoint, audience='https://my-cloud-run-service.run.app/')
+    print(f"cloudrun endpoint: {endpoint}")
+    audience_search = re.search("(.*app)", endpoint)
+    if audience_search:
+        audience = audience_search.group(1)
+        print(f"audience: {audience}")
+    else:
+        raise ValueError("No valid audience founod from the specified endpoint")
+    
+    # Biuld the request headers containing auth credentials
+    headers = make_authorized_header(audience)
 
+    # Send the request to pubsub
     data = json.dumps(metadata)
     req = requests.post(endpoint, data=data, headers=headers)
-    print(req.request.headers)
-    print(req.request.body)
+    print(f"request body: {req.request.body}")
+    content = json.loads(req.content)
+    print(json.dumps(content, indent=2))
 
     return req
