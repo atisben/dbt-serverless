@@ -18,7 +18,8 @@ resource "google_cloud_scheduler_job" "job" {
       "endpoint"="${google_cloud_run_service.dbt.status[0].url}/test",
       "cli"="run",
       "--profiles-dir"="profiles",
-      "--project-dir"="${var.dbt_project_dir}"
+      "--project-dir"="${var.dbt_project_dir}",
+      "--vars"={"start_date"="date.today()"}
       }))
   }
   depends_on = [

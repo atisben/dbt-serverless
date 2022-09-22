@@ -3,6 +3,7 @@ import subprocess
 import os
 import json
 from google.auth import jwt
+from datetime import date, timedelta
 
 
 def receive_authorized_get_request(request):
@@ -56,6 +57,16 @@ def test(request):
         else:
             arguments = "run".split(" ")
             command.extend(arguments)
+        
+        # Replace the vars
+        if "--vars" in request_data:
+            vars_dict = request_data["--vars"]
+            for key, value in vars_dict:
+                try:
+                    vars_dict[key] = str(eval(value))
+                except:
+                    pass
+
     # Add an argument for the project dir if not specified
     if not any("--project-dir" in c for c in command):
         project_dir = os.environ.get("DBT_PROJECT_DIR", None)
