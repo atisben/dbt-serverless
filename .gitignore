@@ -129,9 +129,6 @@ dmypy.json
 .pyre/
 
 
-# dbt profiles
-profiles.yml
-
 # Local .terraform directories
 **/.terraform/*
 

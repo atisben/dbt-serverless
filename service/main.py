@@ -1,9 +1,11 @@
+from crypt import methods
 from flask import Flask, render_template, request
 import subprocess
 import os
 import json
 from google.auth import jwt
 from datetime import date, timedelta
+import yaml
 
 
 def receive_authorized_get_request(request):
@@ -35,11 +37,7 @@ def home():
 
 # Execute a dbt command
 @app.route("/test", methods=["GET", "POST"])
-
-
-def test(request):
-    
-    receive_authorized_get_request(request)
+def test():
 
     #TODO remove the environment variables
     os.environ["DBT_PROJECT_DIR"]="dbt_process"
@@ -48,9 +46,11 @@ def test(request):
     
     command = ["dbt"]
     arguments = []
-    request_data = request.get_json()
+    # Convert the request data bytes object to json object
+    request_data = json.loads(request.data.decode("utf-8"))
 
     if request_data:
+        print(f"request data:{request_data}")
         if "cli" in request_data:
             arguments = request_data["cli"].split(" ")
             command.extend(arguments)
@@ -86,6 +86,7 @@ def test(request):
 # Format the response
     response = {
         "result": {
+            "request_data": request_data,
             "status": "ok" if result.returncode == 0 else "error",
             "args": result.args,
             "return_code": result.returncode,
@@ -94,6 +95,23 @@ def test(request):
         }
     }
 
+    return response, 200
+
+@app.route("/directories", methods=["GET"])
+def directories():
+    try:
+        with open("./profiles/profiles.yml", "r") as stream:
+            try:
+                profiles = yaml.safe_load(stream)
+            except yaml.YAMLError as exc:
+                profiles = exc
+    except:
+        profiles="Not found"
+
+    response = {
+        "directories": [x[0] for x in os.walk("./")],
+        "profiles": profiles
+    }
     return response, 200
 
 if __name__ == "__main__":

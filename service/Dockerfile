@@ -7,6 +7,7 @@ ENV DBT_PROJECT_DIR /dbt_process
 
 # Deploy the code
 COPY . ${APP_HOME}
+COPY ./profiles/profiles.yml ${APP_HOME}/profiles/
 
 # Install dependencies
 WORKDIR ${APP_HOME}
