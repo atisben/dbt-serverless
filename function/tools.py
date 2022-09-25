@@ -21,7 +21,7 @@ from google.cloud.exceptions import NotFound
 from pygments import highlight, lexers, formatters
 from pygments_pprint_sql import SqlFilter
 from colorama import Fore, Back, Style
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 
 #-------------------------------
@@ -165,9 +165,9 @@ class Table():
         assert table.expires is None
 
         # set table to expire 5 days from now
-        expiration = datetime.now(timezone.utc) + timedelta(days=num_days)
+        expiration = datetime.now(datetime.timezone.utc) + timedelta(days=num_days)
         table.expires = expiration
-        table = client.update_table(table, ["expires"])  # API request
+        table = self.client.update_table(table, ["expires"])  # API request
 
         # expiration is stored in milliseconds
         margin = datetime.timedelta(microseconds=1000)
@@ -259,8 +259,8 @@ class Query:
         '''
         Executes the query
         
-                Parameters:
-                        dry_run: (bool) if set to True, runs an estimation of the costs
+            Parameters:
+                dry_run: (bool) if set to True, runs an estimation of the costs
                         
         '''        
         # Set up query job configs
@@ -295,14 +295,14 @@ class Query:
         """
         Creates a new table from the results of a query
         
-                Parameters:
-                        endpoint (obj:Table): output table path
-                        table_suffix (str): any variable suffix to add at the end of the table ("_" will be added automatically)
-                        write_disposition (str): default is WRITE_TRUNCATE and will replace the table, can be changed for WRITE_APPEND
-                        date_partitioning_field (str): 	If set, the table is partitioned by this field, the field must be a top-level TIMESTAMP, DATETIME, or DATE field
-                        clustering_fields (list[str]): Fields defining clustering for the table,  immutable after table creation
-                        sequence (bool): if set to False, doesn't wait for the execution of the job to start the next one in the loop (beta)         
-                        dry_run (bool): True if this query should be a dry run to estimate costs
+            Parameters:
+                endpoint (obj:Table): output table path
+                table_suffix (str): any variable suffix to add at the end of the table ("_" will be added automatically)
+                write_disposition (str): default is WRITE_TRUNCATE and will replace the table, can be changed for WRITE_APPEND
+                date_partitioning_field (str): 	If set, the table is partitioned by this field, the field must be a top-level TIMESTAMP, DATETIME, or DATE field
+                clustering_fields (list[str]): Fields defining clustering for the table,  immutable after table creation
+                sequence (bool): if set to False, doesn't wait for the execution of the job to start the next one in the loop (beta)         
+                dry_run (bool): True if this query should be a dry run to estimate costs
                         
         """
         

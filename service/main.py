@@ -1,4 +1,3 @@
-from crypt import methods
 from flask import Flask, render_template, request
 import subprocess
 import os
@@ -9,24 +8,52 @@ import yaml
 
 app = Flask(__name__)
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["GET", "POST"])
 def home():
-    return render_template("index.html")
+    response = "Please run a dbt command to display the response"
+    return render_template("index.html", response=response)
 
+@app.route("/test/app", methods=["POST"])
+def test_app():
+    command = []
+    command.extend(request.form.get('dbt_command').split(" "))
+    print("recieved requested command from the app interface")
+    # Check that the command contains all the required parameters
+    if not set(['dbt', '--project-dir', '--profiles-dir']).issubset(command):
+        response = {"status": "wrong dbt command"}
+    
+    else:
+        result = subprocess.run(command,
+                            text=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+        response = {
+            "result": {
+                "status": "ok" if result.returncode == 0 else "error",
+                "args": result.args,
+                "return_code": result.returncode,
+                "command_output": result.stdout,
+                "command": command
+            }
+        }
+    response = json.dumps(response, indent=4)
+    return render_template("index.html", response=response)
 
+    
 # Execute a dbt command
-@app.route("/test", methods=["GET", "POST"])
-def test():
+@app.route("/test/cloudfunction", methods=["POST"])
+def test_cf():
 
     #TODO remove the environment variables
     os.environ["DBT_PROJECT_DIR"]="dbt_process"
     os.environ["DBT_PROFILES_DIR"]="profiles"
 
-    
+    request_data = json.loads(request.data.decode("utf-8"))
+    print("recieved requested command from cloudfunciton")
+
     command = ["dbt"]
     arguments = []
-    # Convert the request data bytes object to json object
-    request_data = json.loads(request.data.decode("utf-8"))
+    
 
     if request_data:
         print(f"request data:{request_data}")
@@ -74,10 +101,14 @@ def test():
         }
     }
 
-    return response, 200
+    return render_template("index.html", response=response)
 
-@app.route("/directories", methods=["GET"])
+@app.route("/debug/directories", methods=["GET"])
 def directories():
+    '''
+    Lists the directories contained in the Docker container
+    
+    '''
     try:
         with open("./profiles/profiles.yml", "r") as stream:
             try:

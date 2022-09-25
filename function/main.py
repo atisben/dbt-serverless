@@ -28,6 +28,10 @@ def make_authorized_header(audience):
 
 
 def read_pubsub_metadata(event, context):
+    '''
+    Decodes base64 message into json
+    '''
+    
     msg = base64.b64decode(event['data']).decode('utf-8')
     try: 
         pubsub_req = json.loads(msg)
@@ -38,6 +42,9 @@ def read_pubsub_metadata(event, context):
     return pubsub_req
 
 def start_check():
+    '''
+    Runs custom checks on bigquery tables           
+    '''
 
     #TODO define env variables
     PROJECT_ID = os.getenv('PROJECT_ID')
@@ -53,6 +60,18 @@ def start_check():
 
 
 def pubsub_to_cloudrun(event, context):
+    '''
+    Main function triggered by PubSub message. Reads the content of the pub sub mesagge and pass it to the
+    cloud function API
+
+        Parameters:
+            event (base64): PubSub message
+            context* (base64): Metadata recieved by pubSub message
+
+        Returns:
+            request : Post request to the endpoint API
+    
+    '''
 
     # Read metadata from pubSub message
     metadata = read_pubsub_metadata(event, context)

@@ -19,11 +19,24 @@
         <!-- Header-->
         <header class="masthead d-flex align-items-center">
             <div class="container px-4 px-lg-5 text-center">
-                <h1 class="mb-1">Service is live</h1>
-                <h3 class="mb-5">Click the button below to run a test</h3>
-                <a class="btn btn-primary btn-xl" href="/test">Run a test</a>
+                <h1 class="mb-1">dbt Service is live</h1>
+                <h3 class="mb-5">Run a custom dbt command to test it</h3>
+                <form method="POST" action="/test/app">
+                    <div class="form-group">
+                      <input type="text" class="form-control" name="dbt_command" style="margin: 1rem 0rem" placeholder="dbt run --project-dir dbr_process --profiles-dir profiles --vars {}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send custom dbt command</button>
+                </form> 
             </div>
+
         </header>
+
+        <div>
+            <pre class="container px-4 px-lg-5"><code>
+                {{ response }}
+            </code></pre>
+        </div>
+       
 
         <!-- Footer-->
         <footer class="footer text-center">

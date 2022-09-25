@@ -263,11 +263,13 @@ pre {
   margin-bottom: 1rem;
   overflow: auto;
   font-size: 0.875em;
+  white-space: pre-line;
 }
 pre code {
   font-size: inherit;
   color: inherit;
   word-break: normal;
+  white-space: pre-line;
 }
 
 code {
@@ -346,7 +348,7 @@ button,
 select,
 optgroup,
 textarea {
-  margin: 0;
+  margin: 1rem 0rem;
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
@@ -2187,12 +2189,13 @@ progress {
 
 .form-control {
   display: block;
+  margin: 1rem 0rem;
   width: 100%;
   padding: 0.375rem 0.75rem;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #212529;
+  color: #343636;
   background-color: #fff;
   background-clip: padding-box;
   border: 1px solid #ced4da;
@@ -2214,7 +2217,7 @@ progress {
   cursor: pointer;
 }
 .form-control:focus {
-  color: #212529;
+  color: #343636;
   background-color: #fff;
   border-color: #8ec0cf;
   outline: 0;
@@ -2487,8 +2490,6 @@ textarea.form-control-lg {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  -webkit-print-color-adjust: exact;
-          color-adjust: exact;
 }
 .form-check-input[type=checkbox] {
   border-radius: 0.25em;
