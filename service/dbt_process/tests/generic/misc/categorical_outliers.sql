@@ -1,0 +1,43 @@
+{% test categorical_outliers(model, column_name, max_proportion = 0.8)%}
+
+{{ config(
+    enabled=true,
+    fail_calc = "IF(test_status='OK',0,1)",
+    warn_if = "=2",
+    error_if = "=1",
+) }}
+
+WITH error_rows AS (
+  SELECT *
+  FROM 
+  ( 
+    SELECT {{column_name}},
+            COUNT(1) AS failing_values,
+            SAFE_DIVIDE(COUNT(*),(SELECT COUNT(*) FROM {{model}})) AS value_proportion 
+    FROM {{ model }}
+    GROUP BY {{ column_name }}
+  )
+  WHERE value_proportion > {{max_proportion}}
+)
+
+
+SELECT *, 
+       IF(failing_rows > 0,'KO','OK') AS test_status
+FROM
+(
+    SELECT
+        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
+        '{{model['database']}}' AS project,
+        '{{model['schema']}}' AS dataset,
+        '{{model['table']}}' AS table,
+        '{{column_name}}' AS column,
+        'categorical_outliers' AS test_name,
+        "proportion of the same value in the specified column shouldn't be higher than max_proportion" AS test_rule,
+        'max_proportion = {{max_proportion}}' AS test_params,
+        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
+        ARRAY(SELECT AS STRUCT {{ column_name }},value_proportion FROM error_rows ) AS result
+        
+)
+
+
+{% endtest %}
