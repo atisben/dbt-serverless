@@ -15,8 +15,9 @@ locals {
   function_folder = "function"
   function_name   = "check"
 
-  service_folder = "service"
-  service_name   = var.service_name
+  service_folder = "services"
+  service_name_dbt   = var.service_name_dbt
+  service_name_dagster = var.service_name_dagster
 
   deployment_name = "dbt"
   dbt_worker_sa  = "serviceAccount:${google_service_account.dbt_worker.email}"

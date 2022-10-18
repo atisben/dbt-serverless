@@ -40,8 +40,7 @@ Cloud Build is used to push the docker image in Google Container Registry.
 Run the following command to push the docker image to gcr
 
 ```sh
-gcloud builds submit \
---project <my_project>
+gcloud builds submit --project <my_project>
 ```
 
 ## Set up Google cloud services using terraform
