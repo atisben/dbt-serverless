@@ -45,7 +45,7 @@ def test_app():
 def test_cf():
 
     #TODO remove the environment variables
-    os.environ["DBT_PROJECT_DIR"]="dbt_process"
+    os.environ["DBT_PROJECT_DIR"]="dbt_service"
     os.environ["DBT_PROFILES_DIR"]="profiles"
 
     request_data = json.loads(request.data.decode("utf-8"))
