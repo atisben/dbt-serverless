@@ -44,6 +44,7 @@ resource "google_cloud_run_service_iam_policy" "private" {
   service  = google_cloud_run_service.dbt.name
 
   policy_data = data.google_iam_policy.private.policy_data
+  depends_on = [google_service_account.dbt_worker]
 }
 
 # Set permissions
