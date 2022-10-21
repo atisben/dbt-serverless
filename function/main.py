@@ -84,13 +84,8 @@ def pubsub_to_cloudrun(event, context):
     else:
         raise ValueError("No valid audience founod from the specified endpoint")
 
-    # Update vars if required
-    vars_dict = metadata.get('--vars')
-    # Add a new vars key:value pair
-    vars_dict["test"] = "test_value"
-    # Update the dict to add the new variable
-    metadata.update({"--vars":{vars_dict}})
-
+    # Update vars dictionnary if required
+    vars_dict = metadata["--vars"]
     print(f"metadata: {metadata}")
     
     # Build the request headers containing auth credentials
