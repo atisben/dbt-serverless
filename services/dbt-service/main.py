@@ -67,7 +67,7 @@ def test_cf():
         # Replace the vars
         if "--vars" in request_data:
             vars_dict = request_data["--vars"]
-            for key, value in vars_dict:
+            for key, value in vars_dict.items():
                 try:
                     vars_dict[key] = str(eval(value))
                 except:
