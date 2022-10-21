@@ -16,6 +16,11 @@ resource "google_cloud_run_service" "dbt" {
     percent         = 100
     latest_revision = true
   }
+  metadata{
+    annotations = {
+        "run.googleapis.com/ingress" = var.ingress
+      }
+  }
 
   depends_on = [google_project_service.run]
 }
@@ -37,6 +42,11 @@ resource "google_cloud_run_service" "dagster" {
   traffic {
     percent         = 100
     latest_revision = true
+  }
+  metadata{
+    annotations = {
+        "run.googleapis.com/ingress" = var.ingress
+      }
   }
 
   depends_on = [google_project_service.run]
