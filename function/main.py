@@ -95,7 +95,5 @@ def pubsub_to_cloudrun(event, context):
     data = json.dumps(metadata)
     req = requests.post(endpoint, data=data, headers=headers)
     print(f"request body: {req.request.body}")
-    content = json.loads(req.content)
-    print(json.dumps(content, indent=2))
 
     return req
