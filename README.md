@@ -94,9 +94,18 @@ PORT=8081 python main.py
 
 
 Make sure you are located in the `service/dbt_process/` directory
-Run dbt locally
+Run dbt test localy (adapt the example below)
+```sh
+dbt test \
+--vars '{"day_before_yesterday": "20221104", "first_day_of_month": "20221101", "start_year_month": "2022_11", "year_month": "202211", "yesterday": "20221105"}' \
+--project-dir dbt_process \
+--profiles-dir profiles
+```
+Run dbt run localy (adapt the example below)
+
 ```sh
 dbt run \
---profiles-dir ../profiles/ \
---project-dir <project-directory> 
+--vars '{"day_before_yesterday": "20221104", "first_day_of_month": "20221101", "start_year_month": "2022_11", "year_month": "202211", "yesterday": "20221105"}' \
+--project-dir dbt_process \
+--profiles-dir profiles
 ```
