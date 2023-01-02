@@ -61,6 +61,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_object = google_storage_bucket_object.archive.name
   entry_point           = "pubsub_to_cloudrun"
   service_account_email = google_service_account.dbt_worker.email
+   timeout              = 540
 
   event_trigger {
       event_type= "google.pubsub.topic.publish"

@@ -7,6 +7,7 @@ import base64
 import google.auth.transport.requests
 import google.oauth2.id_token
 import re
+import time
 
 def make_authorized_header(audience):
     """
@@ -75,25 +76,25 @@ def pubsub_to_cloudrun(event, context):
 
     # Read metadata from pubSub message
     metadata = read_pubsub_metadata(event, context)
-    endpoint = metadata.get('endpoint')
-    print(f"cloudrun endpoint: {endpoint}")
-    audience_search = re.search("(.*app)", endpoint)
-    if audience_search:
-        audience = audience_search.group(1)
-        print(f"audience: {audience}")
-    else:
-        raise ValueError("No valid audience founod from the specified endpoint")
+    for job in metadata:
+        endpoint = job.get('endpoint')
+        print(f"cloudrun endpoint: {endpoint}")
+        audience_search = re.search("(.*app)", endpoint)
+        if audience_search:
+            audience = audience_search.group(1)
+            print(f"audience: {audience}")
+        else:
+            raise ValueError("No valid audience founod from the specified endpoint")
 
-    # Update vars dictionnary if required
-    vars_dict = metadata["--vars"]
-    print(f"metadata: {metadata}")
-    
-    # Build the request headers containing auth credentials
-    headers = make_authorized_header(audience)
+        # Update vars dictionnary if required
+        vars_dict = job["--vars"]
+        print(f"metadata: {job}")
+        
+        # Build the request headers containing auth credentials
+        headers = make_authorized_header(audience)
 
-    # Send the request to pubsub
-    data = json.dumps(metadata)
-    req = requests.post(endpoint, data=data, headers=headers)
-    print(f"request body: {req.request.body}")
-
-    return req
+        # Send the request to pubsub
+        data = json.dumps(job)
+        req = requests.post(endpoint, data=data, headers=headers)
+        print(f"request body: {req.request.body}")
+        time.sleep(60)
