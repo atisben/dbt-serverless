@@ -14,13 +14,34 @@ resource "google_cloud_scheduler_job" "job" {
   pubsub_target {
     # topic.id is the topic's full resource name.
     topic_name = google_pubsub_topic.topic.id
-    data       = base64encode(jsonencode({
-      "endpoint"="${google_cloud_run_service.dbt.status[0].url}/test/cloudfunction",
-      "cli"="run",
-      "--profiles-dir"="profiles",
-      "--project-dir"="${var.dbt_project_dir}",
-      "--vars"={"start_date"="date.today()"}
-      }))
+    data       = base64encode(jsonencode(tolist([
+      {
+        "endpoint"="${google_cloud_run_service.dbt.status[0].url}/test/cloudfunction",
+        "cli"="test",
+        "--profiles-dir"="profiles",
+        "--project-dir"=var.dbt_project_dir,
+        "--vars"={
+          "yesterday"="(date.today() - timedelta(days=1)).strftime('%Y%m%d')",
+          "day_before_yesterday"="(date.today() - timedelta(days=2)).strftime('%Y%m%d')",
+          "start_year_month"="(date.today() - timedelta(days=1)).strftime('%Y_%m')",
+          "first_day_of_month"="(date.today() - timedelta(days=1)).strftime('%Y%m01')",
+          "year_month"="(date.today() - timedelta(days=1)).strftime('%Y%m')",
+          }
+      },
+      {
+        "endpoint"="${google_cloud_run_service.dbt.status[0].url}/test/cloudfunction",
+        "cli"="run",
+        "--profiles-dir"="profiles",
+        "--project-dir"=var.dbt_project_dir,
+        "--vars"={
+          "yesterday"="(date.today() - timedelta(days=1)).strftime('%Y%m%d')",
+          "day_before_yesterday"="(date.today() - timedelta(days=2)).strftime('%Y%m%d')",
+          "start_year_month"="(date.today() - timedelta(days=1)).strftime('%Y_%m')",
+          "first_day_of_month"="(date.today() - timedelta(days=1)).strftime('%Y%m01')",
+          "year_month"="(date.today() - timedelta(days=1)).strftime('%Y%m')",
+          }
+      },
+      ])))
   }
   depends_on = [
     google_cloud_run_service.dbt
@@ -40,6 +61,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_object = google_storage_bucket_object.archive.name
   entry_point           = "pubsub_to_cloudrun"
   service_account_email = google_service_account.dbt_worker.email
+   timeout              = 540
 
   event_trigger {
       event_type= "google.pubsub.topic.publish"

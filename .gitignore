@@ -166,3 +166,4 @@ terraform.rc
 .terraform.lock.hcl
 
 temp/
+.user.yaml

@@ -1,4 +1,4 @@
-dbt_process:
+dbt_service:
   outputs:
     dev:
       dataset: dev

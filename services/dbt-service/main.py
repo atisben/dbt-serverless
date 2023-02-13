@@ -49,7 +49,7 @@ def test_cf():
     os.environ["DBT_PROFILES_DIR"]="profiles"
 
     request_data = json.loads(request.data.decode("utf-8"))
-    print("recieved requested command from cloudfunciton")
+    print("recieved requested command from CloudFunction")
 
     command = ["dbt"]
     arguments = []
@@ -67,11 +67,14 @@ def test_cf():
         # Replace the vars
         if "--vars" in request_data:
             vars_dict = request_data["--vars"]
-            for key, value in vars_dict:
+            for key, value in vars_dict.items():
                 try:
                     vars_dict[key] = str(eval(value))
                 except:
                     pass
+            var_string = json.dumps(vars_dict)
+            print(f"vars:{var_string}")
+            command.extend(["--vars", var_string])
 
     # Add an argument for the project dir if not specified
     if not any("--project-dir" in c for c in command):
@@ -84,6 +87,7 @@ def test_cf():
         if profiles_dir:
             command.extend(["--profiles-dir", profiles_dir])
     # Execute the dbt command
+    print(f"Translated command: {command}")
     result = subprocess.run(command,
                             text=True,
                             stdout=subprocess.PIPE,
@@ -100,6 +104,7 @@ def test_cf():
             "command": command
         }
     }
+    print(f"response: {response}")
 
     return render_template("index.html", response=response)
 
