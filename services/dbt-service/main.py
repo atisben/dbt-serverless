@@ -5,6 +5,7 @@ import json
 from datetime import date, timedelta
 import yaml
 from google.cloud import storage
+import logging
 
 
 app = Flask(__name__)
@@ -42,23 +43,53 @@ def test_app():
 
     
 # Execute a dbt command
-@app.route("/test/cloudfunction", methods=["POST"])
+@app.route("/run", methods=["POST"])
 def test_cf():
 
-    def download_bucket_objects(bucket_name, blob_path, local_path):
-        # blob path is bucket folder name
-        command = "gsutil cp -r gs://{bucketname}/{blobpath} {localpath}".format(bucketname = bucket_name, blobpath = blob_path, localpath = local_path)
-        print(f"Retrievig {blob_path} from GCS {bucket_name} bucket")
-        os.system(command)
-        return command
+    def findOccurrences(s, ch): # to find position of '/' in blob path ,used to create folders in local storage
+        return [i for i, letter in enumerate(s) if letter == ch]
+
+    def download_from_bucket(bucket_name, blob_path, local_path):    
+        # Create this folder locally
+        if not os.path.exists(local_path):
+            os.makedirs(local_path)        
+
+        storage_client = storage.Client()
+        bucket = storage_client.get_bucket(bucket_name)
+        blobs=list(bucket.list_blobs(prefix=blob_path))
+
+        startloc = 0
+        for blob in blobs:
+            startloc = 0
+            folderloc = findOccurrences(blob.name.replace(blob_path, ''), '/') 
+            if(not blob.name.endswith("/")):
+                if(blob.name.replace(blob_path, '').find("/") == -1):
+                    downloadpath=local_path + '/' + blob.name.replace(blob_path, '')
+                    logging.info(downloadpath)
+                    blob.download_to_filename(downloadpath)
+                else:
+                    for folder in folderloc:
+                        
+                        if not os.path.exists(local_path + '/' + blob.name.replace(blob_path, '')[startloc:folder]):
+                            create_folder=local_path + '/' +blob.name.replace(blob_path, '')[0:startloc]+ '/' +blob.name.replace(blob_path, '')[startloc:folder]
+                            startloc = folder + 1
+                            os.makedirs(create_folder)
+                        
+                    downloadpath=local_path + '/' + blob.name.replace(blob_path, '')
+
+                    blob.download_to_filename(downloadpath)
+                    logging.info(blob.name.replace(blob_path, '')[0:blob.name.replace(blob_path, '').find("/")])
+
+        logging.info('Blob {} downloaded to {}.'.format(blob_path, local_path))
+        print('Blob {} downloaded to {}.'.format(blob_path, local_path))
 
     # Import the content of the models GCS bucket
-    download_bucket_objects("dbt-service", "models", "./dbt_service")
+    download_from_bucket("dbt-service", "models", "./dbt_service")
     # Import the content of the profiles GCS bucket
-    download_bucket_objects("dbt-service", "profiles", ".")
+    download_from_bucket("dbt-service", "profiles", ".")
 
     #TODO remove the environment variables
-    os.environ["DBT_PROJECT_DIR"]="dbt_process"
+    os.environ["DBT_PROJECT_DIR"]="project"
     os.environ["DBT_PROFILES_DIR"]="profiles"
 
     request_data = json.loads(request.data.decode("utf-8"))
@@ -67,7 +98,6 @@ def test_cf():
     command = ["dbt"]
     arguments = []
     
-
     if request_data:
         print(f"request data:{request_data}")
         if "cli" in request_data:
@@ -100,8 +130,6 @@ def test_cf():
         profiles_dir = os.environ.get("DBT_PROFILES_DIR", None)
         if profiles_dir:
             command.extend(["--profiles-dir", profiles_dir])
-    
-
     
     # Execute the dbt command
     print(f"Translated command: {command}")

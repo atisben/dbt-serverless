@@ -4,6 +4,7 @@ import os
 from tools import Directory, Table, Query
 import requests
 import base64
+import urllib
 import google.auth.transport.requests
 import google.oauth2.id_token
 import re
@@ -84,7 +85,7 @@ def pubsub_to_cloudrun(event, context):
             audience = audience_search.group(1)
             print(f"audience: {audience}")
         else:
-            raise ValueError("No valid audience founod from the specified endpoint")
+            raise ValueError("No valid audience found from the specified endpoint")
 
         # Update vars dictionnary if required
         vars_dict = job["--vars"]
@@ -96,5 +97,6 @@ def pubsub_to_cloudrun(event, context):
         # Send the request to pubsub
         data = json.dumps(job)
         req = requests.post(endpoint, data=data, headers=headers)
+        print(f"request headers: {req.request.headers}")
         print(f"request body: {req.request.body}")
         time.sleep(60)

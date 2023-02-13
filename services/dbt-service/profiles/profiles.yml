@@ -1,4 +1,4 @@
-dbt_service:
+main_profile:
   outputs:
     dev:
       dataset: dev
@@ -7,7 +7,7 @@ dbt_service:
       location: EU
       method: oauth
       priority: interactive
-      project: serverless-dbt-362814
+      project: 	test-dbt-377710
       threads: 4
       type: bigquery
   target: dev

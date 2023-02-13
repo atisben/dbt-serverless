@@ -50,7 +50,7 @@ resource "google_cloud_run_service_iam_policy" "private" {
 # Set permissions
 resource "google_project_iam_binding" "service_permissions" {
   for_each = toset([
-    "cloudfunctions.invoker", "bigquery.dataEditor", "bigquery.jobUser"
+    "cloudfunctions.invoker", "bigquery.dataEditor", "bigquery.jobUser", "storage.objectViewer"
   ])
 
   role       = "roles/${each.key}"

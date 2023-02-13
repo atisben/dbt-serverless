@@ -9,14 +9,14 @@ resource "google_cloud_scheduler_job" "job" {
   description = "trigger the dbt processing"
   time_zone   = "Europe/Paris"
   region      = var.region
-  schedule    = "0 6 * * *"
+  schedule    = "0 0 6 * *"
 
   pubsub_target {
     # topic.id is the topic's full resource name.
     topic_name = google_pubsub_topic.topic.id
     data       = base64encode(jsonencode(tolist([
       {
-        "endpoint"="${google_cloud_run_service.dbt.status[0].url}/test/cloudfunction",
+        "endpoint"="${google_cloud_run_service.dbt.status[0].url}/run",
         "cli"="test",
         "--profiles-dir"="profiles",
         "--project-dir"=var.dbt_project_dir,
@@ -29,7 +29,7 @@ resource "google_cloud_scheduler_job" "job" {
           }
       },
       {
-        "endpoint"="${google_cloud_run_service.dbt.status[0].url}/test/cloudfunction",
+        "endpoint"="${google_cloud_run_service.dbt.status[0].url}/run",
         "cli"="run",
         "--profiles-dir"="profiles",
         "--project-dir"=var.dbt_project_dir,

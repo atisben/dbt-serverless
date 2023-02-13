@@ -15,8 +15,8 @@ variable "service_name_dagster" {
 
 variable "dbt_project_dir"{
   type    = string
-  default = "dbt_service"
-  description = "Name of the dbt project initialized at the beggining of the project (default is dbt_service)"
+  default = "project"
+  description = "Name of the dbt project initialized at the beggining of the project (default is project)"
 }
 
 variable "region" {

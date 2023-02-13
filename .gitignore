@@ -167,3 +167,8 @@ terraform.rc
 
 temp/
 .user.yaml
+
+# Ignore DBT files
+target/
+dbt_packages/
+logs/

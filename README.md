@@ -80,6 +80,12 @@ To add a var value generated from the cloud function, simply update the `--vars`
 
 
 # Local debugging
+## Run docker as command line
+
+```sh
+docker run -it --entrypoint /bin/bash <image_name>
+```
+
 ## Service
 ### Install dependencies
 ```sh

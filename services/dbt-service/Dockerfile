@@ -1,13 +1,14 @@
-FROM python:3.10.7-slim-bullseye
+FROM python:3.9.16-alpine
 ENV PYTHONUNBUFFERED True
 ENV APP_HOME /services
 ENV PORT 8080
 ENV DBT_PROFILES_DIR /profiles
-ENV DBT_PROJECT_DIR /dbt_service
+ENV DBT_PROJECT_DIR /project
+RUN apk update && apk add bash
 
 # Deploy the code
 COPY . ${APP_HOME}
-COPY ./profiles/profiles.yml ${APP_HOME}/profiles/
+# COPY ./profiles/profiles.yml ${APP_HOME}/profiles/
 
 # Install dependencies
 WORKDIR ${APP_HOME}
