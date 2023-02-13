@@ -4,6 +4,7 @@ import os
 import json
 from datetime import date, timedelta
 import yaml
+from google.cloud import storage
 
 
 app = Flask(__name__)
@@ -44,6 +45,18 @@ def test_app():
 @app.route("/test/cloudfunction", methods=["POST"])
 def test_cf():
 
+    def download_bucket_objects(bucket_name, blob_path, local_path):
+        # blob path is bucket folder name
+        command = "gsutil cp -r gs://{bucketname}/{blobpath} {localpath}".format(bucketname = bucket_name, blobpath = blob_path, localpath = local_path)
+        print(f"Retrievig {blob_path} from GCS {bucket_name} bucket")
+        os.system(command)
+        return command
+
+    # Import the content of the models GCS bucket
+    download_bucket_objects("dbt-service", "models", "./dbt_service")
+    # Import the content of the profiles GCS bucket
+    download_bucket_objects("dbt-service", "profiles", ".")
+
     #TODO remove the environment variables
     os.environ["DBT_PROJECT_DIR"]="dbt_process"
     os.environ["DBT_PROFILES_DIR"]="profiles"
@@ -82,10 +95,14 @@ def test_cf():
         if project_dir:
             command.extend(["--project-dir", project_dir])
 
+
     if not any("--profile-dir" in c for c in command):
         profiles_dir = os.environ.get("DBT_PROFILES_DIR", None)
         if profiles_dir:
             command.extend(["--profiles-dir", profiles_dir])
+    
+
+    
     # Execute the dbt command
     print(f"Translated command: {command}")
     result = subprocess.run(command,

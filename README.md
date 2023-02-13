@@ -51,6 +51,10 @@ terraform init
 terraform plan
 terraform apply
 ```
+
+
+# WIP Copy the content of the models to the google cloud storage bucket
+
 # Using variables 
 
 dbt variables can be set before the run to replace any available placeholder in the dbt models `{{var("my_var")}}`

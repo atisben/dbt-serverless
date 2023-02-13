@@ -57,3 +57,16 @@ resource "google_project_iam_binding" "service_permissions" {
   members    = [local.dbt_worker_sa]
   depends_on = [google_service_account.dbt_worker]
 }
+
+# Create the storage bucket
+resource "google_storage_bucket" "storage_bucket" {
+  name = var.service_name_dbt
+  storage_class = "REGIONAL"
+  location = var.region
+}
+
+resource "google_storage_bucket_object" "content_folder" {
+  name          = "models/"
+  content       = "Not really a directory, but it's empty."
+  bucket        = "${google_storage_bucket.storage_bucket.name}"
+}
