@@ -65,8 +65,14 @@ resource "google_storage_bucket" "storage_bucket" {
   location = var.region
 }
 
-resource "google_storage_bucket_object" "content_folder" {
+resource "google_storage_bucket_object" "content_folder_models" {
   name          = "models/"
+  content       = "Not really a directory, but it's empty."
+  bucket        = "${google_storage_bucket.storage_bucket.name}"
+}
+
+resource "google_storage_bucket_object" "content_folder_profiles" {
+  name          = "profiles/"
   content       = "Not really a directory, but it's empty."
   bucket        = "${google_storage_bucket.storage_bucket.name}"
 }
