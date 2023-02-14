@@ -83,12 +83,12 @@ def test_cf():
         logging.info('Blob {} downloaded to {}.'.format(blob_path, local_path))
         print('Blob {} downloaded to {}.'.format(blob_path, local_path))
 
-    # Import the content of the models GCS bucket
-    download_from_bucket("dbt-service", "models", "./dbt_service")
-    # Import the content of the profiles GCS bucket
-    download_from_bucket("dbt-service", "profiles", ".")
+    # # Import the content of the models GCS bucket
+    # download_from_bucket("dbt-service", "models", "./dbt_service")
+    # # Import the content of the profiles GCS bucket
+    # download_from_bucket("dbt-service", "profiles", ".")
 
-    #TODO remove the environment variables
+    #TODO remove the environment variables, it seems that it's still needed
     os.environ["DBT_PROJECT_DIR"]="project"
     os.environ["DBT_PROFILES_DIR"]="profiles"
 
