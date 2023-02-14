@@ -2,7 +2,7 @@
 
 {{ config(
     enabled=true,
-    fail_calc = "IF(test_status='OK',0,1)",
+    fail_calc = "IF(test_status='PASS',0,1)",
     warn_if = "=2",
     error_if = "=1",
 ) }}
@@ -28,11 +28,11 @@
 
 SELECT *, 
        {% if min_value!=None and max_value!=None%}
-       IF(result > {{ max_value }} OR result < {{ min_value }},'KO','OK') AS test_status
+       IF(result > {{ max_value }} OR result < {{ min_value }},'FAIL','PASS') AS test_status
        {% elif min_value==None and max_value!=None%}
-       IF(result > {{ max_value }},'KO','OK') AS test_status
+       IF(result > {{ max_value }},'FAIL','PASS') AS test_status
        {% elif min_value!=None and max_value==None%}
-       IF(result < {{ min_value }},'KO','OK') AS test_status
+       IF(result < {{ min_value }},'FAIL','PASS') AS test_status
        {% endif %}
 FROM
 (

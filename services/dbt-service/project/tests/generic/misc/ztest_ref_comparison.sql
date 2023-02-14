@@ -14,7 +14,7 @@
 
 {{ config(
     enabled=true,
-    fail_calc = "failing_rows",
+    fail_calc = "IF(test_status='PASS',0,1)",
     warn_if = "=2",
     error_if = "=1",
 ) }}
@@ -65,7 +65,7 @@ error_rows AS(
 )
 
 SELECT *, 
-       IF(failing_rows > 0,'KO','OK') AS test_status
+       IF(failing_rows > 0,'FAIL','PASS') AS test_status
 FROM
 (
     SELECT

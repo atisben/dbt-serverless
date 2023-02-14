@@ -14,7 +14,7 @@
 
 {{ config(
     enabled=true,
-    fail_calc = "IF(test_status='OK',0,1)",
+    fail_calc = "IF(test_status='PASS',0,1)",
     warn_if = "=2",
     error_if = "=1",
 ) }}
@@ -56,7 +56,7 @@ compare_window_data AS(
         {% for metric in metric_list %}
         compare_window_data.{{aggregation}}_{{metric}} AS {{aggregation}}_{{metric}}_window2 ,
         {% endfor %}
-        "OK" AS test_status
+        "PASS" AS test_status
     FROM
         current_window_data INNER JOIN compare_window_data USING({{dimension_list | join(',')}})
 
