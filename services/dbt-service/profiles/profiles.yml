@@ -1,7 +1,7 @@
 main_profile:
   outputs:
-    dev:
-      dataset: dev
+    staging:
+      dataset: staging
       job_execution_timeout_seconds: 300
       job_retries: 1
       location: EU
@@ -10,4 +10,4 @@ main_profile:
       project: test-dbt-377710
       threads: 4
       type: bigquery
-  target: dev
+  target: staging

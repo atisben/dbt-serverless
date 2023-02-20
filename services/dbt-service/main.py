@@ -93,18 +93,6 @@ def test_cf():
         else:
             arguments = "run".split(" ")
             command.extend(arguments)
-        
-        # Replace the vars
-        if "--vars" in request_data:
-            vars_dict = request_data["--vars"]
-            for key, value in vars_dict.items():
-                try:
-                    vars_dict[key] = str(eval(value))
-                except:
-                    pass
-            var_string = json.dumps(vars_dict)
-            print(f"vars:{var_string}")
-            command.extend(["--vars", var_string])
 
     # Add an argument for the project dir if not specified
     if not any("--project-dir" in c for c in command):
