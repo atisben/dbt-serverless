@@ -76,3 +76,9 @@ resource "google_storage_bucket_object" "content_folder_profiles" {
   content       = "Not really a directory, but it's empty."
   bucket        = "${google_storage_bucket.storage_bucket.name}"
 }
+
+resource "google_storage_bucket_object" "content_folder_profiles" {
+  name          = "variables/"
+  content       = "Not really a directory, but it's empty."
+  bucket        = "${google_storage_bucket.storage_bucket.name}"
+}

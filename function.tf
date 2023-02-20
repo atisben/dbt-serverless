@@ -19,27 +19,13 @@ resource "google_cloud_scheduler_job" "job" {
         "endpoint"="${google_cloud_run_service.dbt.status[0].url}/run",
         "cli"="test",
         "--profiles-dir"="profiles",
-        "--project-dir"=var.dbt_project_dir,
-        "--vars"={
-          "yesterday"="(date.today() - timedelta(days=1)).strftime('%Y%m%d')",
-          "day_before_yesterday"="(date.today() - timedelta(days=2)).strftime('%Y%m%d')",
-          "start_year_month"="(date.today() - timedelta(days=1)).strftime('%Y_%m')",
-          "first_day_of_month"="(date.today() - timedelta(days=1)).strftime('%Y%m01')",
-          "year_month"="(date.today() - timedelta(days=1)).strftime('%Y%m')",
-          }
+        "--project-dir"=var.dbt_project_dir
       },
       {
         "endpoint"="${google_cloud_run_service.dbt.status[0].url}/run",
         "cli"="run",
         "--profiles-dir"="profiles",
-        "--project-dir"=var.dbt_project_dir,
-        "--vars"={
-          "yesterday"="(date.today() - timedelta(days=1)).strftime('%Y%m%d')",
-          "day_before_yesterday"="(date.today() - timedelta(days=2)).strftime('%Y%m%d')",
-          "start_year_month"="(date.today() - timedelta(days=1)).strftime('%Y_%m')",
-          "first_day_of_month"="(date.today() - timedelta(days=1)).strftime('%Y%m01')",
-          "year_month"="(date.today() - timedelta(days=1)).strftime('%Y%m')",
-          }
+        "--project-dir"=var.dbt_project_dir
       },
       ])))
   }
