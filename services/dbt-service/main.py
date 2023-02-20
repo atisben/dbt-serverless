@@ -46,47 +46,31 @@ def test_app():
 @app.route("/run", methods=["POST"])
 def test_cf():
 
-    def findOccurrences(s, ch): # to find position of '/' in blob path ,used to create folders in local storage
-        return [i for i, letter in enumerate(s) if letter == ch]
+    def download_bucket_contents(bucket_name, source_directory, destination_directory):
+        storage_client = storage.Client('test-dbt-377710')
+        bucket = storage_client.bucket(bucket_name)
+        blobs = bucket.list_blobs(prefix=source_directory)  # List all objects in the bucket with the given prefix.
 
-    def download_from_bucket(bucket_name, blob_path, local_path):    
-        # Create this folder locally
-        if not os.path.exists(local_path):
-            os.makedirs(local_path)        
-
-        storage_client = storage.Client()
-        bucket = storage_client.get_bucket(bucket_name)
-        blobs=list(bucket.list_blobs(prefix=blob_path))
-
-        startloc = 0
         for blob in blobs:
-            startloc = 0
-            folderloc = findOccurrences(blob.name.replace(blob_path, ''), '/') 
-            if(not blob.name.endswith("/")):
-                if(blob.name.replace(blob_path, '').find("/") == -1):
-                    downloadpath=local_path + '/' + blob.name.replace(blob_path, '')
-                    logging.info(downloadpath)
-                    blob.download_to_filename(downloadpath)
-                else:
-                    for folder in folderloc:
-                        
-                        if not os.path.exists(local_path + '/' + blob.name.replace(blob_path, '')[startloc:folder]):
-                            create_folder=local_path + '/' +blob.name.replace(blob_path, '')[0:startloc]+ '/' +blob.name.replace(blob_path, '')[startloc:folder]
-                            startloc = folder + 1
-                            os.makedirs(create_folder)
-                        
-                    downloadpath=local_path + '/' + blob.name.replace(blob_path, '')
+            # Extract the filename from the blob object
+            relative_path = os.path.relpath(blob.name, source_directory)
+            destination_path = os.path.join(destination_directory, relative_path)
 
-                    blob.download_to_filename(downloadpath)
-                    logging.info(blob.name.replace(blob_path, '')[0:blob.name.replace(blob_path, '').find("/")])
+            # If the object is a directory, create the local directory
+            if blob.name.endswith('/'):
+                os.makedirs(destination_path, exist_ok=True)
+                continue
 
-        logging.info('Blob {} downloaded to {}.'.format(blob_path, local_path))
-        print('Blob {} downloaded to {}.'.format(blob_path, local_path))
+            # Download the object to a local file
+            blob.download_to_filename(destination_path)
 
-    # # Import the content of the models GCS bucket
-    # download_from_bucket("dbt-service", "models", "./dbt_service")
-    # # Import the content of the profiles GCS bucket
-    # download_from_bucket("dbt-service", "profiles", ".")
+        print(f"Download complete: {source_directory} -> {destination_directory}")
+        logging.info(f'Blob {source_directory} downloaded to {destination_directory}.')
+
+    # Import the content of the models GCS bucket
+    download_bucket_contents("dbt-service", "models", "./project/models")
+    # Import the content of the profiles GCS bucket
+    download_bucket_contents("dbt-service", "profiles", "./profiles")
 
     #TODO remove the environment variables, it seems that it's still needed
     os.environ["DBT_PROJECT_DIR"]="project"

@@ -7,7 +7,7 @@ main_profile:
       location: EU
       method: oauth
       priority: interactive
-      project: 	test-dbt-377710
+      project: test-dbt-377710
       threads: 4
       type: bigquery
   target: dev
