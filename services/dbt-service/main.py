@@ -6,6 +6,7 @@ from datetime import date, timedelta
 import yaml
 from google.cloud import storage
 import logging
+import dbt.config
 
 
 app = Flask(__name__)
@@ -71,6 +72,8 @@ def test_cf():
     download_bucket_contents("dbt-service", "models", "./project/models")
     # Import the content of the profiles GCS bucket
     download_bucket_contents("dbt-service", "profiles", "./profiles")
+    # Import the content of the variables
+    download_bucket_contents("dbt-service", "variables", ".")
 
     #TODO remove the environment variables, it seems that it's still needed
     os.environ["DBT_PROJECT_DIR"]="project"

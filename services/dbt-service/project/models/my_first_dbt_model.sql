@@ -11,7 +11,7 @@
 
 with source_data as (
 
-    select {{ var('my_var_1') }} as variable
+    select 1 as id
     union all
     select null as id
 
