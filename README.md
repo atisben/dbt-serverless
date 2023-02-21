@@ -18,33 +18,43 @@ dbt serverless service is a template repository for deploying scheduled serverle
 
 # Deployement
 
-## dbt project upload
-1. Upload your dbt project folder into the `service/dbt_process` directory
-2. Upload your dbt profiles.yml file into the `service/profiles`, make sure the project is refered as dbt_process
+## Adapt the dbt project config files & models
+1. Clone the repository
+2. Modify or upload your dbt projects folder into the `service/dbt-service/project` directory. 
+3. Modify or upload your dbt profiles.yml file into the `service/profiles`, make sure the project is refered as dbt_process
 
-## Google cloud authentication
+## Connect your account to GCP
 
-Run the following command to connect to GCP. If you are running the command on a local machine, make sure you've installed the [google cloud CLI](https://cloud.google.com/sdk/docs/install)
+If your terminal is not already connected to GCP. Run the following commands, make sure you've installed the [google cloud CLI](https://cloud.google.com/sdk/docs/install)
 
 ```sh
     gcloud auth application-default login
     gcloud auth login
 ```
 
-Follow the instructions and login to your GCP project
+Follow the instructions to login to your GCP project
 
 
-## Cloud build push docker image
+## Build the dbt docker image
 
-Cloud Build is used to push the docker image in Google Container Registry.
-Run the following command to push the docker image to gcr
+the dbt-service folder aims to be packaged into a docker image running in a container. Cloud Build is used to push the docker image in Google Container Registry.
+Run the following command to push the docker image to gcr.
 
 ```sh
-gcloud builds submit --project <my_project>
+gcloud builds submit --project <my_gcp_project>
 ```
 
-## Set up Google cloud services using terraform
-Terraform is used to create the Cloud Run service (sourcing from Container Registry), Cloud Storage, and Cloud Functions. IAM is configured throughout the automation.
+## Set up Google Cloud services using terraform
+Terraform is used to deploy every other services used by this project, it includes:
+- IAM service account
+- Storage bucket
+- Cloud function 
+- PubSub topic
+- Cloud Scheduler
+- CloudRun
+
+To deploy the services, run the command in the following order.
+Make sure [terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) is installed on your local machine.
 
 ```
 terraform init
@@ -52,70 +62,56 @@ terraform plan
 terraform apply
 ```
 
+# Variables and configs
+Variables and config files are retrieved from the storage bucket and downloaded to the running dbt container.
+To make the files available in storage, we recommend setting up github actions to upload the following files or folders to the storage bucker:
+- `dbt-service/project/models`
+- `dbt-service/project/tests`
+- `dbt-service/variables.yml`
+- `dbt-service/project/dbt_project.yml`
+- `dbt-service/profiles`
 
-# WIP Copy the content of the models to the google cloud storage bucket
+## Creating dbt variables
 
-# Using variables 
+one of the main disadvantage of dbt is that it doesn't handle python variables. One way to overcome this issue is to use the eval() function on top of string type python variables to generate vars configs.
 
-dbt variables can be set before the run to replace any available placeholder in the dbt models `{{var("my_var")}}`
+vars configs are located in the `dbt-service/variables.yml` file and exported to the `variable/` GCS bucket. An example of this file is displayed below.
 
-## Setting up variables from cloud scheduler
-Variables set through the Cloud scheduler are easily accessed and modified from the cloud scheduler payload. This option is recommended when the variables don't rely on any external dependency.
+```yml
+my_var_1: '123'
+my_var_2: 'datetime.date.today()'
+```
+At start, the docker container will translate the variables into readable strings to create the following file, which will be taken as an input of dbt models and tests.
 
-varialbes must be defined as a dictionnary of "key" : "values" pairs under the `"--vars"` parameter of the scheduler payload
-*note that every default python methods as well as datetime.date and datetime.timedelta can be used to define a variable*
+```yml
+my_var_1: 123
+my_var_2: 2023-02-20
+```
+
+>note that to be used within a model or a test, dbt variables must be called in a jinja2 language such as  `{{var("my_var_2")}}`
+
+## Scheduling runs
+By default, the runs will be scheduled on a daily basis at 6am based on the following json exported to cloud scheduler.
+Note that you can add as many command as you like. Here are displayed the two common commands `dbt test` and `dbt run`, sent in a loop to the cloudRun container.
 
 e.g.
 ```json
-"--vars": {
-    "start_date":"date.today()",
-    "name": "Frank"
-    "number": "round(0.0239)"
-    }
+{
+    "--profiles-dir":"profiles",
+    "--project-dir":"project",
+    "cli":"test",
+    "endpoint":"https://dbt-service-xxxxxxxxx-ew.a.run.app/run"
+},
+{
+    "--profiles-dir":"profiles",
+    "--project-dir":"project",
+    "cli":"run",
+    "endpoint":"https://dbt-service-xxxxxxxxx-ew.a.run.app/run"
+}
 ```
 
-## Setting up variables from the Cloud function
-Variables set through the cloud function are made to be generated from an external dependency (e.g. retrieve the latest date of a BigQuery column)
-To add a var value generated from the cloud function, simply update the `--vars` dictionnary within the metadata.
+# Debugging
+
+[Check the debug documentation](docs/debug.md)
 
 
-# Local debugging
-## Run docker as command line
-
-```sh
-docker run -it --entrypoint /bin/bash <image_name>
-```
-
-## Service
-### Install dependencies
-```sh
-virtualenv .venv
-source .venv/bin/activate
-pip install -r service/requirements.txt
-```
-### Run the service locally
-
-```sh
-cd service
-PORT=8081 python main.py
-```
-
-### Run dbt
-
-
-Make sure you are located in the `service/dbt_process/` directory
-Run dbt test localy (adapt the example below)
-```sh
-dbt test \
---vars '{"day_before_yesterday": "20221104", "first_day_of_month": "20221101", "start_year_month": "2022_11", "year_month": "202211", "yesterday": "20221105"}' \
---project-dir dbt_process \
---profiles-dir profiles
-```
-Run dbt run localy (adapt the example below)
-
-```sh
-dbt run \
---vars '{"day_before_yesterday": "20221104", "first_day_of_month": "20221101", "start_year_month": "2022_11", "year_month": "202211", "yesterday": "20221105"}' \
---project-dir dbt_process \
---profiles-dir profiles
-```
