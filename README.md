@@ -89,6 +89,13 @@ my_var_2: 2023-02-20
 ```
 
 >note that to be used within a model or a test, dbt variables must be called in a jinja2 language such as  `{{var("my_var_2")}}`
+### Regenerate the vars
+If you've added new vars to be evaluated and translated through the python function, you can run the following command tu update the `project/vars/` folder
+
+```sh
+import evaluate_vars
+evaluate_vars.generate_variable_file('variables.yml', 'project/vars/project_vars.yml')
+```
 
 ## Scheduling runs
 By default, the runs will be scheduled on a daily basis at 6am based on the following json exported to cloud scheduler.

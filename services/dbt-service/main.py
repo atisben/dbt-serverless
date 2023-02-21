@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import yaml
 from google.cloud import storage
 import logging
-import dbt.config
+import evaluate_vars
 
 
 app = Flask(__name__)
@@ -74,6 +74,10 @@ def test_cf():
     download_bucket_contents("dbt-service", "profiles", "./profiles")
     # Import the content of the variables
     download_bucket_contents("dbt-service", "variables", ".")
+    # Generate the vars folder for the project
+    evaluate_vars.generate_variable_file('variables.yml', 'project/vars/project_vars.yml')
+    # Import the content of the variables
+    download_bucket_contents("dbt-service", "tests", "./project/tests")
 
     #TODO remove the environment variables, it seems that it's still needed
     os.environ["DBT_PROJECT_DIR"]="project"
