@@ -1,12 +1,12 @@
 This dbt package contains tests that can be (re)used across dbt projects.
 
-# Installation
+# Use dbt tests as an ad-hoc package
 
 Inside your dbt project, create a file named `packages.yml` at the root of the project. Inside, specify the package that you want to install like so:
 ```yml
 packages:
-  - git: "https://[TOKEN]@github.com/plf55/dbt-test-lib.git"  # For now it is a Github repo 
-    revision: main
+  - git: "https://[TOKEN]@github.com/<git repo>"
+    revision: master
 ```
 The revision field corresponds to the branch or the tag you want to install on your project. The main is most likely the most stable version.
 
@@ -18,9 +18,9 @@ dbt deps
 
 dbt will import the dependencies you specified in your project in a new folder called `dbt_packages`.
 
-To use the tests that are in the library you just imported, make sure to prefixe those tests by `dbt_alerting_55.` so that dbt knows that you are refereing to a test that is in the library you imported and not in your own project.
+# Available generic tests
 
-# Content
+## Content
 ## [Generic tests](#generic-tests-1)
 
 ### [Metric tests](#metric-tests-1)

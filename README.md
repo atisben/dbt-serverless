@@ -109,6 +109,9 @@ e.g.
     "endpoint":"https://dbt-service-xxxxxxxxx-ew.a.run.app/run"
 }
 ```
+# Built in tests
+This package comes in with available generic SQL tests.
+[Check the tests documentation](docs/tests.md)
 
 # Debugging
 
