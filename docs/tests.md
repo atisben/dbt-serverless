@@ -86,17 +86,7 @@ YAML:
     max_value: 15
 ```
 
-JSON:
-```json
-"dbt_alerting_55.column_count":{
-    "min_value": 5,
-    "max_value": 15
-}
-```
-
 *Applies to*: **Table**
-
-*Trigram*: **mts**  
 
 ------------------------------------------------------------------------------------------------
 
@@ -108,6 +98,7 @@ Expects table to have a number of rows between two values.
 |------------|-------------|-----------|
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive) | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive)| Yes if `min_value` is not defined
+| `where_clause` (string) | SQL exception contained after WHERE in the query| No
 
 **Usage:**
 
@@ -116,19 +107,10 @@ YAML:
 - dbt_alerting_55.row_count:
     min_value: 15000
     max_value: 17000
-```
-
-JSON:
-```json
-"dbt_alerting_55.row_count":{
-    "min_value": 15000,
-    "max_value": 17000
-}
+    where_clause: value BETWEEN 1 AND 1000
 ```
 
 *Applies to*: **Table**
-
-*Trigram*: **mts**
 
 ------------------------------------------------------------------------------------------------
 
@@ -136,10 +118,11 @@ JSON:
 
 ## **average_between**
 
-Expect the average value of the column to be between two values.
+Expect the average of values in the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive) | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive)| Yes if `min_value` is not defined
 
@@ -148,21 +131,12 @@ Expect the average value of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.average_between:
+    column_name: my_column
     min_value: 1234
     max_value: 10000
 ```
 
-JSON:
-```json
-"dbt_alerting_55.average_between":{
-    "min_value": 1234,
-    "max_value": 10000
-}
-```
-
 *Applies to*: **Column** (Numeric types)
-
-*Trigram*: **mcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -171,6 +145,7 @@ Expect the maximum value of the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive) | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive)| Yes if `min_value` is not defined
 
@@ -179,21 +154,12 @@ Expect the maximum value of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.max_between:
+    column_name: my_column
     min_value: 1234
     max_value: 10000
 ```
 
-JSON:
-```json
-"dbt_alerting_55.max_between":{
-    "min_value": 1234,
-    "max_value": 10000
-}
-```
-
 *Applies to*: **Column** (Numeric types)
-
-*Trigram*: **mcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -202,6 +168,7 @@ Expect the median value of the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive) | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive)| Yes if `min_value` is not defined
 |`respect_nulls` (bool) | Ignore nulls if set to `False`| No (default: `False`)
@@ -211,23 +178,13 @@ Expect the median value of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.median_between:
+    column_name: my_column
     min_value: 1234
     max_value: 10000
     respect_nulls: true
 ```
 
-JSON:
-```json
-"dbt_alerting_55.median_betweene":{
-    "min_value": 1234,
-    "max_value": 10000,
-    "respect_nulls": false
-}
-```
-
 *Applies to*: **Column** (Numeric types)
-
-*Trigram*: **mcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -236,6 +193,7 @@ Expect the minimum value of the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive) | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive)| Yes if `min_value` is not defined
 
@@ -244,21 +202,13 @@ Expect the minimum value of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.min_between:
+    column_name: my_column
     min_value: 1234
     max_value: 10000
 ```
 
-JSON:
-```json
-"dbt_alerting_55.min_between":{
-    "min_value": 1234,
-    "max_value": 10000
-}
-```
-
 *Applies to*: **Column** (Numeric types)
 
-*Trigram*: **mcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -267,6 +217,7 @@ Expect the proportion of not-null values of the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive). Must be between 0 and 1 as it's a proportion | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive). Must be between 0 and 1 as it's a proportion| Yes if `min_value` is not defined
 
@@ -275,21 +226,12 @@ Expect the proportion of not-null values of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.not_null_proportion:
+    column_name: my_column
     min_value: 0
     max_value: 0.5
 ```
 
-JSON:
-```json
-"dbt_alerting_55.not_null_proportion":{
-    "min_value": 0,
-    "max_value": 0.5
-}
-```
-
 *Applies to*: **Column** (Numeric types)
-
-*Trigram*: **mcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -298,6 +240,7 @@ Expect the proportion of null values of the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive). Must be between 0 and 1 as it's a proportion | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive). Must be between 0 and 1 as it's a proportion| Yes if `min_value` is not defined
 
@@ -306,21 +249,13 @@ Expect the proportion of null values of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.null_proportion:
+    column_name: my_column
     min_value: 0
     max_value: 0.5
 ```
 
-JSON:
-```json
-"dbt_alerting_55.null_proportion":{
-    "min_value": 0,
-    "max_value": 0.5
-}
-```
 
 *Applies to*: **Column**
-
-*Trigram*: **mcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -329,6 +264,7 @@ Expect the p-percentile value of the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive) | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive)| Yes if `min_value` is not defined
 | `p` (float) | Percentile to consider. Must be between 0 and 1| Yes
@@ -337,23 +273,14 @@ Expect the p-percentile value of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.percentile_between:
+    column_name: my_column
     min_value: 1234
     max_value: 10000
     p: 0.5
 ```
 
-JSON:
-```json
-"dbt_alerting_55.percentile_between":{
-    "min_value": 1234,
-    "max_value": 10000,
-    "p": 0.5
-}
-```
 
 *Applies to*: **Column** (Numeric types)
-
-*Trigram*: **mcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -362,6 +289,7 @@ Expect the standard deviation value of the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive) | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive)| Yes if `min_value` is not defined
 
@@ -370,21 +298,12 @@ Expect the standard deviation value of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.stddev_between:
+    column_name: my_column
     min_value: 1234
     max_value: 10000
 ```
 
-JSON:
-```json
-"dbt_alerting_55.stddev_between":{
-    "min_value": 1234,
-    "max_value": 10000
-}
-```
-
 *Applies to*: **Column** (Numeric types)
-
-*Trigram*: **mcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -393,6 +312,7 @@ Expect the sum of all the values of the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive) | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive)| Yes if `min_value` is not defined
 
@@ -401,6 +321,7 @@ Expect the sum of all the values of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.sum_between:
+    column_name: my_column
     min_value: 1234
     max_value: 10000
 ```
@@ -415,8 +336,6 @@ JSON:
 
 *Applies to*: **Column** (Numeric types)
 
-*Trigram*: **mcs**
-
 ------------------------------------------------------------------------------------------------
 
 ## **unique_proportion**
@@ -424,6 +343,7 @@ Expect the proportion of unique values of the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive). Must be between 0 and 1 as it's a proportion | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive). Must be between 0 and 1 as it's a proportion| Yes if `min_value` is not defined
 
@@ -432,21 +352,12 @@ Expect the proportion of unique values of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.unique_proportion:
+    column_name: my_column
     min_value: 0
     max_value: 0.5
 ```
 
-JSON:
-```json
-"dbt_alerting_55.unique_proportion":{
-    "min_value": 0,
-    "max_value": 0.5
-}
-```
-
 *Applies to*: **Column**
-
-*Trigram*: **mcs**
 
 ------------------------------------------------------------------------------------------------
 
