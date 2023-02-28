@@ -596,6 +596,7 @@ Expect z-score values of the `key_field` to follow the column distribution.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `key_field` (string) | Column to uniquely identify each record. This column will be used to identify faulty records in the output table. | Yes
 | `max_pos_zscore` (numeric)| maximum positive z-score value allowed  | No (default to 3)
 | `max_neg_zscore` (numeric) | maximum negative z-score value allowed  | No (default to -3)
@@ -626,6 +627,7 @@ Expect all the values in the column to not have a frequency of apparition freate
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `max_proportion` (float) | Maximum proportion of apparition of a value | Yes
 
 **Usage:**
@@ -633,18 +635,13 @@ Expect all the values in the column to not have a frequency of apparition freate
 YAML:
 ```yml
 - dbt_alerting_55.categorical_outliers:
+
+    column_name: my_column
     max_proportion: 0.6
 ```
 
-JSON:
-```json
-"dbt_alerting_55.categorical_outliers":{
-    "max_proportion": 0.6
-}
-```
 
 *Applies to*: **Column** (String types)
-
 
 ------------------------------------------------------------------------------------------------
 
@@ -654,6 +651,7 @@ Expect the column to have one of the type provided in the list of types given as
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `column_type_list` (list) | List of types that are allowed for the column | Yes
 
 **Usage:**
@@ -661,16 +659,10 @@ Expect the column to have one of the type provided in the list of types given as
 YAML:
 ```yml
 - dbt_alerting_55.column_type_in_list:
+    column_name: my_column
     column_type_list:
     - INT64
     - FLOAT
-```
-
-JSON:
-```json
-"dbt_alerting_55.column_type_in_list":{
-    "column_type_list": ["INT64","FLOAT"]
-}
 ```
 
 *Applies to*: **Column**
@@ -750,6 +742,7 @@ Expect the date column to have the same date format as the one provided.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `key_field` (string) | Column to uniquely identify each record. This column will be used to identify faulty records in the output table. | Yes
 | `format` (list) | Date format the column should respect (see [here](https://cloud.google.com/bigquery/docs/reference/standard-sql/format-elements#format_elements_date_time) for more information on how to form your date format) | Yes
 
@@ -758,6 +751,7 @@ Expect the date column to have the same date format as the one provided.
 YAML:
 ```yml
 - dbt_alerting_55.date_format:
+    column_name: my_column
     key_field: id
     format: "%Y-%m-%e"
 ```
@@ -775,44 +769,6 @@ JSON:
 
 ------------------------------------------------------------------------------------------------
 
-### **typo_levenshtein**
-
-> WIP: this test is not currently working
-
-Expect to find no typo in the column values. This test compute the levenshtein distance combined with soundex code to establish a similarity score on a scale of 0 to 1.
-
-| Parameter | Description | Mandatory |
-|------------|-------------|-----------|
-| `key_field` (string) | Column to uniquely identify each record. This column will be used to identify faulty records in the output table. | Yes
-| `max_similarity` (numeric)| maximum similarity between two entries before it is considered as a typo. Has to be between 0 and 1.  | Yes
-| `where_clause` (string) | Filter the processed data in the test. This should be written as a regular SQL where clause **without** the WHERE key word. | No
-
-
-**Usage:**
-
-YAML:
-```yml
-- dbt_alerting_55.typo_levenshtein: 
-    key_field: id
-    max_similarity: 0.8
-    where_clause: date BETWEEN "2022-04-04" AND "2022-08-31"
-    
-```
-
-JSON:
-```json
-"dbt_alerting_55.typo_levenshtein":{
-    "key_field": "id",
-    "max_similarity": 0.8,
-    "where_clause": "date BETWEEN `2022-04-04` AND `2022-08-31`"
-
-}
-```
-
-*Applies to*: **Column** (String types)
-
-------------------------------------------------------------------------------------------------
-
 ### **ztest_ref_comparison**
 
 Apply a ztest on a metric distribution and compares it with a reference. A z-test is a statistical test to determine whether two population means are different when the variances are known and the sample size is large. A z-test is a hypothesis test in which the z-statistic follows a normal distribution
@@ -820,9 +776,10 @@ Apply a ztest on a metric distribution and compares it with a reference. A z-tes
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
 | `model` (dbt model) | Default model the test is applied to | Yes
-| `key_field` (string)| Dimension used to aggregate the results of the test | Yes
-| `metric_variable` (string) | Variable used to compute the zscore. | Yes
 | `ref_model` (string) | Model of the table used as a reference for the distribution. This should be written as a regular SQL  table **project.dataset.table** | Yes
+| `key_field` (string)| Dimension used to aggregate the results of the test to be compared with the reference table| Yes
+| `ref_key_field` (string)| Dimension used to aggregate the results of the test to be compared with the test table | Yes
+| `metric_variable` (string) | Variable used to compute the zscore. | Yes
 | `ref_metric_variable` (string) | Variable from the reference table used to compute the zscore. | Yes
 | `filter` (string) | Filter the processed data in the test. This should be written as a regular SQL where clause **without** the WHERE key word. | No
 | `ref_filter` (string) | Filter the processed data in the test. This should be written as a regular SQL where clause **without** the WHERE key word. | No
@@ -835,13 +792,12 @@ YAML:
 ```yml
 - ztest_ref_comparison:
     key_field: campaign_ID
+    ref_key_field: campaign_ID
     metric_variable: revenue
     filter:  channel_lvl0 = "sem"
     ref_model: my-project.my-ref-dataset.my_ref_table_*
     ref_metric_variable: revenue
-    ref_key_field: campaign_ID
     ref_filter:  _TABLE_SUFFIX BETWEEN '20220101' AND '20220131'
-    alias: ztest_ppc_input_output_revenue
     
 ```
 
