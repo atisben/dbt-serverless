@@ -64,11 +64,10 @@ dbt will import the dependencies you specified in your project in a new folder c
 5. [ztest_ref_comparison](#ztestrefcomparison)
 
 # Generic tests
-## **Metric tests**
-## **Table Scope**
 
+## **Table Tests**
 
-## **column_count**
+### **column_count**
 
 Expects table to have a number of columns between two values.
 
@@ -90,7 +89,7 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-## **row_count**
+### **row_count**
 
 Expects table to have a number of rows between two values.
 
@@ -114,9 +113,9 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-## **Column Scope**
+## **Columnar Tests**
 
-## **average_between**
+### **average_between**
 
 Expect the average of values in the column to be between two values.
 
@@ -140,7 +139,7 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-## **max_between**
+### **max_between**
 Expect the maximum value of the column to be between two values.
 
 | Parameter | Description | Mandatory |
@@ -163,7 +162,7 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-## **median_between**
+### **median_between**
 Expect the median value of the column to be between two values.
 
 | Parameter | Description | Mandatory |
@@ -188,7 +187,7 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-## **min_between**
+### **min_between**
 Expect the minimum value of the column to be between two values.
 
 | Parameter | Description | Mandatory |
@@ -212,7 +211,7 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-## **not_null_proportion**
+### **not_null_proportion**
 Expect the proportion of not-null values of the column to be between two values.
 
 | Parameter | Description | Mandatory |
@@ -235,7 +234,7 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-#### **null_proportion**
+### **null_proportion**
 Expect the proportion of null values of the column to be between two values.
 
 | Parameter | Description | Mandatory |
@@ -259,7 +258,7 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-## **percentile_between**
+### **percentile_between**
 Expect the p-percentile value of the column to be between two values.
 
 | Parameter | Description | Mandatory |
@@ -284,7 +283,7 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-## **stddev_between**
+### **stddev_between**
 Expect the standard deviation value of the column to be between two values.
 
 | Parameter | Description | Mandatory |
@@ -307,7 +306,7 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-## **sum_between**
+### **sum_between**
 Expect the sum of all the values of the column to be between two values.
 
 | Parameter | Description | Mandatory |
@@ -338,7 +337,7 @@ JSON:
 
 ------------------------------------------------------------------------------------------------
 
-## **unique_proportion**
+### **unique_proportion**
 Expect the proportion of unique values of the column to be between two values.
 
 | Parameter | Description | Mandatory |
@@ -361,11 +360,15 @@ YAML:
 
 ------------------------------------------------------------------------------------------------
 
-## **Rows tests**
+## **Values Tests**
 
-## **Table Scope**
+Values tests work on a `key_field` principle:
+- `key_field` determines the dimension used to check the data
+- The test will scan any column of interest, and retrieve the `key_field` that don't respect the check.
 
-## **unique_combination_of_columns**
+> Tips: This field must have a high cardinality so that you can quickly understand which values are failing. An unique id is the optimal choice as you would be alerted of any id that doesn't respect the initial check. However unique keys are not always available.
+
+### **unique_combination_of_columns**
 Expect the given combination of columns to be unique on every record.
 
 | Parameter | Description | Mandatory |
@@ -386,32 +389,16 @@ YAML:
     - campaign_name
 ```
 
-JSON:
-```json
-"dbt_alerting_55.unique_combination_of_columns":{
-    "key_field": "id",
-    "combination_of_columns":[
-    "id",
-    "country_code",
-    "date",
-    "campaign_name"
-    ]
-}
-```
-
 *Applies to*: **Table**
 
-*Trigram*: **rts**
-
 ------------------------------------------------------------------------------------------------
-
-### Column Scope
 
 ## **consistent_casing**
 Expect all values of the column to have a consistant casing (i.e. column should not have values "Paris", "paris" and "PARIS" at the same time)
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `key_field` (string) | Column to uniquely identify each record. This column will be used to identify faulty records in the output table. | Yes
 
 **Usage:**
@@ -419,19 +406,11 @@ Expect all values of the column to have a consistant casing (i.e. column should 
 YAML:
 ```yml
 - dbt_alerting_55.consistent_casing:
+    column_name: my_column
     key_field: id
 ```
 
-JSON:
-```json
-"dbt_alerting_55.consistent_casing":{
-    "key_field": "id"
-}
-```
-
 *Applies to*: **Column** (String types)
-
-*Trigram*: **rcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -440,6 +419,7 @@ Expect values of the column to be between the p-low and the p-high percentile va
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `key_field` (string) | Column to uniquely identify each record. This column will be used to identify faulty records in the output table. | Yes
 | `p_low` (float) | Lower bound for percentile range. Must be between 0 and 1 | Yes if `p_high` is not defined
 | `p_high` (float) | Upper bound for percentile range. Must be between 0 and 1 | Yes if `p_low` is not defined
@@ -449,19 +429,11 @@ Expect values of the column to be between the p-low and the p-high percentile va
 YAML:
 ```yml
 - dbt_alerting_55.consistent_casing:
+    column_name: my_column
     key_field: id
 ```
 
-JSON:
-```json
-"dbt_alerting_55.consistent_casing":{
-    "key_field": "id"
-}
-```
-
 *Applies to*: **Column** (Numeric types)
-
-*Trigram*: **rcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -470,9 +442,11 @@ Expect values of the column to match all or any of the 'like' patterns provided.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `key_field` (string) | Column to uniquely identify each record. This column will be used to identify faulty records in the output table. | Yes
 | `like_pattern_list` (list)| List of *like patterns** for the values to match. if you want to insert anti-slash('\') or quotes into your patterns remember to escape them with '\' | Yes
-| `match_on` (string)|  | No, default any
+| `match_on` (string)|  | No, default any (True if any expression is matched),  group (True if all the expressions are matched)
+| `where_clause` (string) | Filter the processed data in the test. This should be written as a regular SQL where clause **without** the WHERE key word. | No
 
 *like patterns are patterns as we defined them in SQL via the [LIKE clause](https://sql.sh/cours/where/like).
 
@@ -481,29 +455,18 @@ Expect values of the column to match all or any of the 'like' patterns provided.
 YAML:
 ```yml
 - dbt_alerting_55.match_like_pattern_list:
+    column_name: my_column
     key_field: id
     like_pattern_list: 
     - campaign\\__\\_test\\_fb
     - campaign\\__\\_test\\_insta
     match_on: "any"
-```
+    where_clause: date BETWEEN {{ var(today_minus_1) }} AND {{ var(today) }}
 
-JSON:
-```json
-"dbt_alerting_55.match_like_pattern_list":{
-    "key_field": "id",
-    "like_pattern_list":[ 
-    "%@%",
-    "%.com",
-    "%@%.com"
-    ],
-    "match_on": "all"
-}
 ```
 
 *Applies to*: **Column** (String types)
 
-*Trigram*: **rcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -513,37 +476,28 @@ Expect values of the column to match all or any of the regex patterns provided.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `key_field` (string) | Column to uniquely identify each record. This column will be used to identify faulty records in the output table. | Yes
 | `regex_pattern_list` (list)| List of regex patterns for the values to match. if you want to insert anti-slash('\') or quotes into your patterns remember to escape them with '\' | Yes
-| `match_on` (string)|  | No, default any
+| `match_on` (string)|  | No, default any (True if any expression is matched),  group (True if all the expressions are matched)
+| `where_clause` (string) | Filter the processed data in the test. This should be written as a regular SQL where clause **without** the WHERE key word. | No
 
 **Usage:**
 
 YAML:
 ```yml
 - dbt_alerting_55.match_regex_pattern_list:
+    column_name: my_column
     key_field: id
     like_pattern_list: 
     - campaign\\__\\_test\\_fb
     - campaign\\__\\_test\\_insta
     match_on: "any"
-```
-
-JSON:
-```json
-"dbt_alerting_55.match_regex_pattern_list":{
-    "key_field": "id",
-    "like_pattern_list":[ 
-    "[a-zA-Z]+_\\d_[a-zA-Z]+_[a-zA-Z]+"
-    "[a-zA-Z]+\\d[a-zA-Z]+"
-    ],
-    "match_on": "any"
-}
+    where_clause: date BETWEEN {{ var(today_minus_1) }} AND {{ var(today) }}
 ```
 
 *Applies to*: **Column** (String types)
 
-*Trigram*: **rcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -552,6 +506,7 @@ Expect values to not contain any of the provided unwanted characters.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `key_field` (string) | Column to uniquely identify each record. This column will be used to identify faulty records in the output table. | Yes
 | `char_list` (list)| List of unwanted characters or strings in the column values | Yes
 
@@ -561,6 +516,7 @@ Expect values to not contain any of the provided unwanted characters.
 YAML:
 ```yml
 - dbt_alerting_55.unwanted_characters:
+    column_name: my_column
     key_field: id
     char_list:
     - "$"
@@ -568,17 +524,6 @@ YAML:
     - "%"
 ```
 
-JSON:
-```json
-"dbt_alerting_55.unwanted_characters":{
-    "key_field": "id",
-    "char_list:":[ 
-    "$",
-    "£",
-    "%"
-    ]
-}
-```
 
 *Applies to*: **Column** (String types)
 
@@ -592,6 +537,7 @@ Expect values of the column to be between two values.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `min_value` (number) | Lower bound of the accepted range of values (inclusive) | Yes if `max_value` is not defined
 | `max_value` (number) | Upper bound of the accepted range of values (inclusive)| Yes if `min_value` is not defined
 | `where_clause` (string) | Filter the processed data in the test. This should be written as a regular SQL where clause **without** the WHERE key word. | No
@@ -602,26 +548,15 @@ Expect values of the column to be between two values.
 YAML:
 ```yml
 - dbt_alerting_55.values_between: 
+    column_name: my_column
     key_field: id
     min_value: 10
     max_value: 350
-    where_clause: date BETWEEN "2022-04-04" AND "2022-08-31"
+    where_clause: date BETWEEN {{ var(today_minus_1) }} AND {{ var(today) }}
 
-```
-
-JSON:
-```json
-"dbt_alerting_55.values_between":{
-    "key_field": "id",
-    "min_value": 10,
-    "max_value": 350,
-    "where_clause": "date BETWEEN `2022-04-04` AND `2022-08-31`"
-}
 ```
 
 *Applies to*: **Column** (Numeric types)
-
-*Trigram*: **rcs**
 
 ------------------------------------------------------------------------------------------------
 
@@ -631,6 +566,7 @@ Expect all values of the column to be one of the provided list of allowed values
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
+| `column_name` (string) | Column to be tested | Yes if the test is not directly applied at the column level in the config file
 | `key_field` (string) | Column to uniquely identify each record. This column will be used to identify faulty records in the output table. | Yes
 | `value_set` (list)| List of allowed values in the column  | Yes
 | `where_clause` (string) | Filter the processed data in the test. This should be written as a regular SQL where clause **without** the WHERE key word. | No
@@ -641,37 +577,22 @@ Expect all values of the column to be one of the provided list of allowed values
 YAML:
 ```yml
 - dbt_alerting_55.values_in_set: 
+    column_name: my_column
     key_field: id
     value_set:
     - Value1
     - Value2
     - Value3
-    where_clause: date BETWEEN "2022-04-04" AND "2022-08-31"
-```
-
-JSON:
-```json
-"dbt_alerting_55.values_in_set":{
-    "key_field": "id",
-    "value_set":[ 
-    "Value1",
-    "Value2",
-    "Value3"
-    ],
-    "where_clause": "date BETWEEN `2022-04-04` AND `2022-08-31`"
-}
+    where_clause: date BETWEEN {{ var(today_minus_1) }} AND {{ var(today) }}
 ```
 
 *Applies to*: **Column** (String or Numeric types)
-
-*Trigram*: **rcs**
-
 
 ------------------------------------------------------------------------------------------------
 
 ## **zscore_outliers**
 
-Expect z-score values of the column to be between two values.
+Expect z-score values of the `key_field` to follow the column distribution.
 
 | Parameter | Description | Mandatory |
 |------------|-------------|-----------|
@@ -679,32 +600,19 @@ Expect z-score values of the column to be between two values.
 | `max_pos_zscore` (numeric)| maximum positive z-score value allowed  | No (default to 3)
 | `max_neg_zscore` (numeric) | maximum negative z-score value allowed  | No (default to -3)
 
-
 **Usage:**
 
 YAML:
 ```yml
 - dbt_alerting_55.zscore_outliers: 
+    column_name: my_column
     key_field: id
     max_pos_zscore: 3
     min_neg_zscore: -3
     
 ```
 
-JSON:
-```json
-"dbt_alerting_55.zscore_outliers":{
-    "key_field": "id",
-    "max_pos_zscore": 3,
-    "min_neg_zscore": -3
-
-}
-```
-
 *Applies to*: **Column** (Numeric types)
-
-*Trigram*: **rcs**
-
 
 ------------------------------------------------------------------------------------------------
 
@@ -712,7 +620,7 @@ JSON:
 ## Other
 
 
-## **categorical_outliers**
+### **categorical_outliers**
 
 Expect all the values in the column to not have a frequency of apparition freater than the one specified. 
 
@@ -740,7 +648,7 @@ JSON:
 
 ------------------------------------------------------------------------------------------------
 
-## **column_type_in_list**
+### **column_type_in_list**
 
 Expect the column to have one of the type provided in the list of types given as input.
 
@@ -769,7 +677,7 @@ JSON:
 
 ------------------------------------------------------------------------------------------------
 
-## **compare_aggregates**
+### **compare_aggregates**
 
 Give a comparison table of two models by comparing aggregates on given columns on given periods of time. This test never fails as it is more a visualisation than a test
 
@@ -836,7 +744,7 @@ JSON:
 
 ------------------------------------------------------------------------------------------------
 
-## **date_format**
+### **date_format**
 
 Expect the date column to have the same date format as the one provided.
 
@@ -867,7 +775,7 @@ JSON:
 
 ------------------------------------------------------------------------------------------------
 
-## **typo_levenshtein**
+### **typo_levenshtein**
 
 > WIP: this test is not currently working
 
@@ -905,7 +813,7 @@ JSON:
 
 ------------------------------------------------------------------------------------------------
 
-## **ztest_ref_comparison**
+### **ztest_ref_comparison**
 
 Apply a ztest on a metric distribution and compares it with a reference. A z-test is a statistical test to determine whether two population means are different when the variances are known and the sample size is large. A z-test is a hypothesis test in which the z-statistic follows a normal distribution
 
