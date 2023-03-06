@@ -18,7 +18,8 @@ resource "google_cloud_run_service" "dbt" {
   }
   metadata{
     annotations = {
-        "run.googleapis.com/ingress" = "internal"
+        "run.googleapis.com/ingress" = "all",
+        "run.googleapis.com/startup-cpu-boost" = true
       }
   }
 
@@ -45,7 +46,8 @@ resource "google_cloud_run_service" "dagster" {
   }
   metadata{
     annotations = {
-        "run.googleapis.com/ingress" = "internal"
+        "run.googleapis.com/ingress" = "all",
+        "run.googleapis.com/startup-cpu-boost" = true
       }
   }
 

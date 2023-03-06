@@ -4,6 +4,9 @@ import os
 import json
 from datetime import date, timedelta
 import yaml
+from google.cloud import storage
+import logging
+import evaluate_vars
 
 
 app = Flask(__name__)
@@ -41,11 +44,43 @@ def test_app():
 
     
 # Execute a dbt command
-@app.route("/test/cloudfunction", methods=["POST"])
+@app.route("/run", methods=["POST"])
 def test_cf():
 
-    #TODO remove the environment variables
-    os.environ["DBT_PROJECT_DIR"]="dbt_process"
+    def download_bucket_contents(bucket_name, source_directory, destination_directory):
+        storage_client = storage.Client('test-dbt-377710')
+        bucket = storage_client.bucket(bucket_name)
+        blobs = bucket.list_blobs(prefix=source_directory)  # List all objects in the bucket with the given prefix.
+
+        for blob in blobs:
+            # Extract the filename from the blob object
+            relative_path = os.path.relpath(blob.name, source_directory)
+            destination_path = os.path.join(destination_directory, relative_path)
+
+            # If the object is a directory, create the local directory
+            if blob.name.endswith('/'):
+                os.makedirs(destination_path, exist_ok=True)
+                continue
+
+            # Download the object to a local file
+            blob.download_to_filename(destination_path)
+
+        print(f"Download complete: {source_directory} -> {destination_directory}")
+        logging.info(f'Blob {source_directory} downloaded to {destination_directory}.')
+
+    # Import the content of the models GCS bucket
+    download_bucket_contents("dbt-service", "models", "./project/models")
+    # Import the content of the profiles GCS bucket
+    download_bucket_contents("dbt-service", "profiles", "./profiles")
+    # Import the content of the variables
+    download_bucket_contents("dbt-service", "variables", ".")
+    # Generate the vars folder for the project
+    evaluate_vars.generate_variable_file('variables.yml', 'project/vars/project_vars.yml')
+    # Import the content of the variables
+    download_bucket_contents("dbt-service", "tests", "./project/tests")
+
+    #TODO remove the environment variables, it seems that it's still needed
+    os.environ["DBT_PROJECT_DIR"]="project"
     os.environ["DBT_PROFILES_DIR"]="profiles"
 
     request_data = json.loads(request.data.decode("utf-8"))
@@ -54,7 +89,6 @@ def test_cf():
     command = ["dbt"]
     arguments = []
     
-
     if request_data:
         print(f"request data:{request_data}")
         if "cli" in request_data:
@@ -63,18 +97,6 @@ def test_cf():
         else:
             arguments = "run".split(" ")
             command.extend(arguments)
-        
-        # Replace the vars
-        if "--vars" in request_data:
-            vars_dict = request_data["--vars"]
-            for key, value in vars_dict.items():
-                try:
-                    vars_dict[key] = str(eval(value))
-                except:
-                    pass
-            var_string = json.dumps(vars_dict)
-            print(f"vars:{var_string}")
-            command.extend(["--vars", var_string])
 
     # Add an argument for the project dir if not specified
     if not any("--project-dir" in c for c in command):
@@ -82,10 +104,12 @@ def test_cf():
         if project_dir:
             command.extend(["--project-dir", project_dir])
 
+
     if not any("--profile-dir" in c for c in command):
         profiles_dir = os.environ.get("DBT_PROFILES_DIR", None)
         if profiles_dir:
             command.extend(["--profiles-dir", profiles_dir])
+    
     # Execute the dbt command
     print(f"Translated command: {command}")
     result = subprocess.run(command,

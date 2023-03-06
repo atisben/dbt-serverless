@@ -3,7 +3,7 @@ ENV PYTHONUNBUFFERED True
 ENV APP_HOME /services
 ENV PORT 8080
 ENV DBT_PROFILES_DIR /dbt-service/profiles
-ENV DBT_PROJECT_DIR /dbt-service/dbt_service
+ENV DBT_PROJECT_DIR /dbt-service/project
 
 # Deploy the code
 COPY . ${APP_HOME}

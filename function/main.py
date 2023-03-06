@@ -4,22 +4,23 @@ import os
 from tools import Directory, Table, Query
 import requests
 import base64
+import urllib
 import google.auth.transport.requests
 import google.oauth2.id_token
 import re
 import time
 
 def make_authorized_header(audience):
-    """
+    '''
     make_authorized_header makes a header for the specified HTTP endpoint
     by authenticating with the ID token obtained from the google-auth client library
     using the specified audience value.
-    """
+    '''
 
     # Cloud Functions uses your function's URL as the `audience` value
     # audience = https://project-region-projectid.cloudfunctions.net/myFunction
     # For Cloud Functions, `endpoint` and `audience` should be equal
-
+    
     auth_req = google.auth.transport.requests.Request()
     id_token = google.oauth2.id_token.fetch_id_token(auth_req, audience)
 
@@ -28,7 +29,7 @@ def make_authorized_header(audience):
     return header
 
 
-def read_pubsub_metadata(event, context):
+def read_pubsub_metadata(event):
     '''
     Decodes base64 message into json
     '''
@@ -42,25 +43,20 @@ def read_pubsub_metadata(event, context):
 
     return pubsub_req
 
-def start_check():
+def start_check(billing_project, project, dataset, table):
     '''
     Runs custom checks on bigquery tables           
     '''
 
-    #TODO define env variables
-    PROJECT_ID = os.getenv('PROJECT_ID')
-    CLOUD_RUN_ENDPOINT = os.getenv('CLOUD_RUN_ENDPOINT')
-
     # initialize BigQuery Client
-    bigquery_client = bigquery.Client(PROJECT_ID)
+    bigquery_client = bigquery.Client(billing_project)
 
-
-    directory = Directory(bigquery_client,PROJECT_ID, "dev")
-    table = Table(bigquery_client, directory, "my_first_dbt_model")
+    directory = Directory(bigquery_client, project, dataset)
+    table = Table(bigquery_client, directory, table)
     return(table.check_if_exist())
 
 
-def pubsub_to_cloudrun(event, context):
+def pubsub_to_cloudrun(event):
     '''
     Main function triggered by PubSub message. Reads the content of the pub sub mesagge and pass it to the
     cloud function API
@@ -75,7 +71,7 @@ def pubsub_to_cloudrun(event, context):
     '''
 
     # Read metadata from pubSub message
-    metadata = read_pubsub_metadata(event, context)
+    metadata = read_pubsub_metadata(event)
     for job in metadata:
         endpoint = job.get('endpoint')
         print(f"cloudrun endpoint: {endpoint}")
@@ -84,10 +80,8 @@ def pubsub_to_cloudrun(event, context):
             audience = audience_search.group(1)
             print(f"audience: {audience}")
         else:
-            raise ValueError("No valid audience founod from the specified endpoint")
+            raise ValueError("No valid audience found from the specified endpoint")
 
-        # Update vars dictionnary if required
-        vars_dict = job["--vars"]
         print(f"metadata: {job}")
         
         # Build the request headers containing auth credentials
@@ -96,5 +90,6 @@ def pubsub_to_cloudrun(event, context):
         # Send the request to pubsub
         data = json.dumps(job)
         req = requests.post(endpoint, data=data, headers=headers)
+        print(f"request headers: {req.request.headers}")
         print(f"request body: {req.request.body}")
         time.sleep(60)
