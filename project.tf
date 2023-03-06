@@ -60,7 +60,7 @@ resource "google_project_iam_binding" "service_permissions" {
 
 # Create the storage bucket
 resource "google_storage_bucket" "storage_bucket" {
-  name = var.service_name_dbt
+  name = "${var.project}-${var.service_name_dbt}"
   storage_class = "REGIONAL"
   location = var.region
 }
@@ -77,7 +77,7 @@ resource "google_storage_bucket_object" "content_folder_profiles" {
   bucket        = "${google_storage_bucket.storage_bucket.name}"
 }
 
-resource "google_storage_bucket_object" "content_folder_profiles" {
+resource "google_storage_bucket_object" "content_folder_variables" {
   name          = "variables/"
   content       = "Not really a directory, but it's empty."
   bucket        = "${google_storage_bucket.storage_bucket.name}"

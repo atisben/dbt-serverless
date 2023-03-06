@@ -3,9 +3,6 @@
 substitutions:
   _SERVICE_DIR: services
   _SERVICE_NAME_DBT: dbt-service
-  _SERVICE_NAME_DAGSTER: dagster-service
-
-
 
 steps:
 
@@ -13,20 +10,10 @@ steps:
     name: "gcr.io/cloud-builders/docker"
     args: ["build","-t","gcr.io/${PROJECT_ID}/${_SERVICE_NAME_DBT}","${_SERVICE_DIR}/${_SERVICE_NAME_DBT}/."]
 
-  - id: "dagster-image"
-    name: "gcr.io/cloud-builders/docker"
-    args: ["build","-t","gcr.io/${PROJECT_ID}/${_SERVICE_NAME_DAGSTER}","${_SERVICE_DIR}"]
-
   - id: "push dbt-image"
     name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/${PROJECT_ID}/${_SERVICE_NAME_DBT}"]
     wait_for: ['dbt-image']
 
-  - id: "push dagster-image"
-    name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/${PROJECT_ID}/${_SERVICE_NAME_DAGSTER}"]
-    wait_for: ['dagster-image']
-
 images:
   - "gcr.io/${PROJECT_ID}/${_SERVICE_NAME_DBT}"
-  - "gcr.io/${PROJECT_ID}/${_SERVICE_NAME_DAGSTER}"

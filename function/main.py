@@ -29,7 +29,7 @@ def make_authorized_header(audience):
     return header
 
 
-def read_pubsub_metadata(event):
+def read_pubsub_metadata(event, context):
     '''
     Decodes base64 message into json
     '''
@@ -56,7 +56,7 @@ def start_check(billing_project, project, dataset, table):
     return(table.check_if_exist())
 
 
-def pubsub_to_cloudrun(event):
+def pubsub_to_cloudrun(event, context):
     '''
     Main function triggered by PubSub message. Reads the content of the pub sub mesagge and pass it to the
     cloud function API
@@ -71,7 +71,7 @@ def pubsub_to_cloudrun(event):
     '''
 
     # Read metadata from pubSub message
-    metadata = read_pubsub_metadata(event)
+    metadata = read_pubsub_metadata(event, context)
     for job in metadata:
         endpoint = job.get('endpoint')
         print(f"cloudrun endpoint: {endpoint}")
