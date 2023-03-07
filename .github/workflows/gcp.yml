@@ -47,8 +47,8 @@ jobs:
           path: ./service/dbt-service/profiles
           destination: ${{ env.GCS_BUCKET }}
 
-      - name: Loop through files and upload to GCS
-        run: |
-          for path in ./service/dbt-service/variables; do
-            gsutil cp $path gs://${{ env.GCS_BUCKET }}/
-          done
+      # - name: Loop through files and upload to GCS
+      #   run: |
+      #     for path in ./service/dbt-service/variables; do
+      #       gsutil cp $path gs://${{ env.GCS_BUCKET }}/
+      #     done
