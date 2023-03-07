@@ -3,7 +3,6 @@ name: Push image to GCR
 on:
   push:
     branches:
-      - gitactions
       - master
 
 env:
@@ -36,10 +35,10 @@ jobs:
       - name: Authorize Docker push
         run: gcloud auth configure-docker
 
-      # - name: Build and Push Container
-      #   run: |-
-      #     docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} services/${{ env.SERVICE }}/.
-      #     docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
+      - name: Build and Push Container
+        run: |-
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} services/${{ env.SERVICE }}/.
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
 
       - name: Upload profiles to GCS
         uses: 'google-github-actions/upload-cloud-storage@v1'
