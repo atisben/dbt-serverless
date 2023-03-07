@@ -3,7 +3,8 @@ name: Push image to GCR
 on:
   push:
     branches:
-      - main
+      - gitactions
+      - master
 
 env:
   IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/dbt-service
