@@ -7,35 +7,38 @@ on:
       - master
 
 env:
-  IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/dbt-service
-  DOCKERFILE_PATH: ./services/dbt-service/Dockerfile
-  GCS_BUCKET: ${{ secrets.GCP_PROJECT_ID }}-dbt-service
-  GCS_DESTINATION: my-folder
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  SERVICE: dbt-service
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
     steps:
-      - name: Authentication
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
-      - name: Checkout code
-        uses: actions/checkout@v2
+      # Setup gcloud CLI
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
 
-      - name: Configure Google Cloud SDK
-        uses: 'google-github-actions/setup-gcloud@v1'
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
 
-      - name: Configure Docker
-        uses: docker/setup-buildx-action@v1
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: ${{ env.IMAGE_NAME }}
+      - name: Build and Push Container
+        run: |-
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} service/${{ env.SERVICE }}/.
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
 
       - name: Copy to GCS
         uses: 'google-github-actions/upload-cloud-storage@v1'

@@ -2,17 +2,17 @@
   
 substitutions:
   _SERVICE_DIR: services
-  _SERVICE_NAME_DBT: dbt-service
+  _SERVICE_NAME: dbt-service
 
 steps:
 
   - id: "dbt-image"
     name: "gcr.io/cloud-builders/docker"
-    args: ["build","-t","gcr.io/${PROJECT_ID}/${_SERVICE_NAME_DBT}","${_SERVICE_DIR}/${_SERVICE_NAME_DBT}/."]
+    args: ["build","-t","gcr.io/${PROJECT_ID}/${_SERVICE_NAME}","${_SERVICE_DIR}/${_SERVICE_NAME}/."]
 
   - id: "push dbt-image"
     name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/${PROJECT_ID}/${_SERVICE_NAME_DBT}"]
+    args: ["push", "gcr.io/${PROJECT_ID}/${_SERVICE_NAME}"]
     wait_for: ['dbt-image']
 
 images:
