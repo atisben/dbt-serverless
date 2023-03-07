@@ -132,4 +132,8 @@ This package comes in with available generic SQL tests.
 
 [Check the debug documentation](docs/debug.md)
 
+# Future improvements
 
+- Add Github actions for cloud run revisions based on the latest docker image
+- Add documentation about CI/CD implementation
+- Implement CI/CD for terraform on master branch
