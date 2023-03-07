@@ -9,7 +9,7 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
   SERVICE: dbt-service
-  GCS_BUCKET: ${{ secrets.GCP_PROJECT }}-${{ SERVICE }}
+  GCS_BUCKET: ${{ secrets.GCP_PROJECT }}-dbt-service
 
 jobs:
   build-and-push:
