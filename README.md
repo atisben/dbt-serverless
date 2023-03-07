@@ -97,6 +97,14 @@ import evaluate_vars
 evaluate_vars.generate_variable_file('variables.yml', 'project/vars/project_vars.yml')
 ```
 
+## Export the models
+Upload the content of the `project/models/` to the corresponding bucket
+Note that it is recommended to implement a CI/CD for exporting these files
+
+## Export the profiles
+Upload the content of the `profles/` to the corresponding bucket
+Note that it is recommended to implement a CI/CD for exporting these files
+
 ## Scheduling runs
 By default, the runs will be scheduled on a daily basis at 6am based on the following json exported to cloud scheduler.
 Note that you can add as many command as you like. Here are displayed the two common commands `dbt test` and `dbt run`, sent in a loop to the cloudRun container.

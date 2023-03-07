@@ -48,8 +48,9 @@ def test_app():
 def test_cf():
 
     def download_bucket_contents(bucket_name, source_directory, destination_directory):
-        storage_client = storage.Client('test-dbt-377710')
-        bucket = storage_client.bucket(bucket_name)
+        storage_client = storage.Client()
+        # Determine the name of the project from client object
+        bucket = storage_client.bucket(f"{storage_client.project}-{bucket_name}")
         blobs = bucket.list_blobs(prefix=source_directory)  # List all objects in the bucket with the given prefix.
 
         for blob in blobs:
@@ -68,20 +69,19 @@ def test_cf():
         print(f"Download complete: {source_directory} -> {destination_directory}")
         logging.info(f'Blob {source_directory} downloaded to {destination_directory}.')
 
-    # Import the content of the models GCS bucket
+    # Import the content of the models GCS bucket, models have to be .sql files
     download_bucket_contents("dbt-service", "models", "./project/models")
-    # Import the content of the profiles GCS bucket
+    # Import the content of the profiles GCS bucket, forfiles are .yml files
     download_bucket_contents("dbt-service", "profiles", "./profiles")
-    # Import the content of the variables
+
+
+    # Import the content of the variables, variables are .yml files
     download_bucket_contents("dbt-service", "variables", ".")
     # Generate the vars folder for the project
     evaluate_vars.generate_variable_file('variables.yml', 'project/vars/project_vars.yml')
     # Import the content of the variables
     download_bucket_contents("dbt-service", "tests", "./project/tests")
 
-    #TODO remove the environment variables, it seems that it's still needed
-    os.environ["DBT_PROJECT_DIR"]="project"
-    os.environ["DBT_PROFILES_DIR"]="profiles"
 
     request_data = json.loads(request.data.decode("utf-8"))
     print("recieved requested command from CloudFunction")
@@ -100,13 +100,13 @@ def test_cf():
 
     # Add an argument for the project dir if not specified
     if not any("--project-dir" in c for c in command):
-        project_dir = os.environ.get("DBT_PROJECT_DIR", None)
+        project_dir = "project"
         if project_dir:
             command.extend(["--project-dir", project_dir])
 
 
     if not any("--profile-dir" in c for c in command):
-        profiles_dir = os.environ.get("DBT_PROFILES_DIR", None)
+        profiles_dir = "profiles"
         if profiles_dir:
             command.extend(["--profiles-dir", profiles_dir])
     

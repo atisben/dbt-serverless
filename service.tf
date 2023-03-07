@@ -18,36 +18,7 @@ resource "google_cloud_run_service" "dbt" {
   }
   metadata{
     annotations = {
-        "run.googleapis.com/ingress" = "all",
-        "run.googleapis.com/startup-cpu-boost" = true
-      }
-  }
-
-  depends_on = [google_project_service.run]
-}
-
-
-resource "google_cloud_run_service" "dagster" {
-  name                       = local.service_name_dagster
-  location                   = var.region
-  autogenerate_revision_name = true
-
-  template {
-    spec {
-      service_account_name = google_service_account.dbt_worker.email
-      containers {
-        image = "gcr.io/${var.project}/dagster-service"
-      }
-    }
-  }
-  traffic {
-    percent         = 100
-    latest_revision = true
-  }
-  metadata{
-    annotations = {
-        "run.googleapis.com/ingress" = "all",
-        "run.googleapis.com/startup-cpu-boost" = true
+        "run.googleapis.com/ingress" = "all"
       }
   }
 
