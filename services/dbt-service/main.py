@@ -73,12 +73,11 @@ def test_cf():
     download_bucket_contents("dbt-service", "models", "./project/models")
     # Import the content of the profiles GCS bucket, forfiles are .yml files
     download_bucket_contents("dbt-service", "profiles", "./profiles")
-
-
     # Import the content of the variables, variables are .yml files
-    download_bucket_contents("dbt-service", "variables", ".")
+    download_bucket_contents("dbt-service", "variables", "./variables")
+
     # Generate the vars folder for the project
-    evaluate_vars.generate_variable_file('variables.yml', 'project/vars/project_vars.yml')
+    evaluate_vars.generate_variable_file('variables/variables.yml', 'project/vars/project_vars.yml')
     # Import the content of the variables
     download_bucket_contents("dbt-service", "tests", "./project/tests")
 
