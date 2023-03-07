@@ -10,6 +10,7 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
   SERVICE: dbt-service
 
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
