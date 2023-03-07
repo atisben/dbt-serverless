@@ -1,0 +1,60 @@
+name: Push image to GCR
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  SERVICE: dbt-service
+  GCS_BUCKET: ${{ secrets.GCP_PROJECT }}-dbt-service
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      # Setup gcloud CLI
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
+
+      - name: Build and Push Container
+        run: |-
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} services/${{ env.SERVICE }}/.
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
+
+      - name: Upload profiles to GCS
+        uses: 'google-github-actions/upload-cloud-storage@v1'
+        with:
+          path: ./services/dbt-service/profiles
+          destination: ${{ env.GCS_BUCKET }}
+
+      - name: Upload models to GCS
+        uses: 'google-github-actions/upload-cloud-storage@v1'
+        with:
+          path: ./services/dbt-service/project/models
+          destination: ${{ env.GCS_BUCKET }}
+
+      - name: Upload variables to GCS
+        uses: 'google-github-actions/upload-cloud-storage@v1'
+        with:
+          path: ./services/dbt-service/variables
+          destination: ${{ env.GCS_BUCKET }}
+      
