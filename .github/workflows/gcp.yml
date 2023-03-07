@@ -16,15 +16,16 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
+      - name: Authentication
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Configure Google Cloud SDK
-        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+        uses: 'google-github-actions/setup-gcloud@v1'
 
       - name: Configure Docker
         uses: docker/setup-buildx-action@v1
@@ -37,8 +38,7 @@ jobs:
           tags: ${{ env.IMAGE_NAME }}
 
       - name: Copy to GCS
-        uses: google-github-actions/upload-cloud-storage@master
+        uses: 'google-github-actions/upload-cloud-storage@v1'
         with:
-          source: ./service/dbt-service/profiles
-          destination: gs://${{ env.GCS_BUCKET }}/
-          credentials: ${{ secrets.GCP_SA_KEY }}
+          path: ./service/dbt-service/profiles
+          destination: ${{ env.GCS_BUCKET }}
