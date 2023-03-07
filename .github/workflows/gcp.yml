@@ -44,11 +44,11 @@ jobs:
       - name: Copy to GCS
         uses: 'google-github-actions/upload-cloud-storage@v1'
         with:
-          path: ./service/dbt-service/profiles
+          path: ./services/dbt-service/profiles
           destination: ${{ env.GCS_BUCKET }}
 
       - name: Loop through files and upload to GCS
         run: |
-          for path in ./service/dbt-service/variables; do
+          for path in ./services/dbt-service/variables; do
             gsutil cp $path gs://${{ env.GCS_BUCKET }}/
           done
