@@ -40,5 +40,5 @@ dbt run \
 ```
 
 ```sh
-cd services/dbt-service/python main.py dbt test --vars '{"my_var_1": "20221104"}' --project-dir project --profiles-dir profiles && dbt run
+cd services/dbt-service/python main.py dbt test --vars '{"my_var_1": "datetime.now().strftime('%Y%m%d')"}' --project-dir project --profiles-dir profiles && dbt run
 ```
