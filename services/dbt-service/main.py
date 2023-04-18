@@ -2,6 +2,7 @@ import subprocess
 import argparse
 from datetime import datetime, timedelta
 import json
+import os
 
 # Argument parser
 
@@ -27,11 +28,13 @@ def evaluate_vars(vars):
 
 def run_subprocess(args):
 
-    # Access the arguments
     # Replace the vars content
-    vars_dict = evaluate_vars(args.vars)
-    vars(args).update(vars_dict)
-
+    try:
+        vars_dict = evaluate_vars(args.vars)
+        vars(args).update(vars_dict)
+    except:
+        pass
+    
     # Add '--' prefix to optional arguments
     args_dict = vars(args)
 
@@ -47,7 +50,9 @@ def run_subprocess(args):
             arg_list.append(str(arg_value))
 
     # Pass arguments to subprocess
-    print(' '.join(arg_list))
+    print(arg_list)
     subprocess.call(arg_list)
 
+
+# Check the current working directory
 run_subprocess(parser.parse_args())

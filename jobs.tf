@@ -2,9 +2,13 @@
 
 resource "google_cloud_run_job" "dbt-job" {
   name          = "dbt-job"
-  location      = "${var.region}"
+  location      = var.region
   image         = "gcr.io/${var.project}/dbt-service:latest"
-  command       = ["dbt", "run"]
+  command       = [
+    "dbt", "run",
+    "&&",
+    "dbt", "test"
+                  ]
   service_account_name = "serviceAccount:${google_service_account.dbt_worker.email}"
   timeout_seconds = 3600
 }

@@ -38,3 +38,7 @@ dbt run \
 --project-dir project \
 --profiles-dir profiles
 ```
+
+```sh
+cd services/dbt-service/python main.py dbt test --vars '{"my_var_1": "20221104"}' --project-dir project --profiles-dir profiles && dbt run
+```
