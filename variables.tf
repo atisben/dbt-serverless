@@ -5,12 +5,8 @@ variable "project" {
 
 variable "service_name_dbt" {
     type = string
+    default = "dbt-service"
     description = "Name of the service as rendered in the google cloud services"
-}
-
-variable "service_name_dagster" {
-    type = string
-    description = "Name of the dagster service as rendered in the google cloud services"
 }
 
 variable "dbt_project_dir"{

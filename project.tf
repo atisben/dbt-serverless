@@ -16,11 +16,6 @@ resource "google_project_service" "cloudbuild" {
   disable_on_destroy = false
 }
 
-resource "google_project_service" "cloudfunctions" {
-  service = "cloudfunctions.googleapis.com"
-  disable_on_destroy = false
-}
-
 # Create a service account
 resource "google_service_account" "dbt_worker" {
   account_id   = "dbt-worker"
@@ -50,7 +45,7 @@ resource "google_cloud_run_service_iam_policy" "private" {
 # Set permissions
 resource "google_project_iam_binding" "service_permissions" {
   for_each = toset([
-    "cloudfunctions.invoker", "bigquery.dataEditor", "bigquery.jobUser", "storage.objectViewer"
+    "bigquery.dataEditor", "bigquery.jobUser", "storage.objectViewer"
   ])
 
   role       = "roles/${each.key}"

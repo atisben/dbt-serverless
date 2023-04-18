@@ -20,9 +20,5 @@ RUN dbt deps
 
 # Start the flask service
 WORKDIR ${APP_HOME}
-ENTRYPOINT python -m gunicorn \
-    --bind :${PORT} \
-    --workers 1 \
-    --threads 8 \
-    --timeout 0 \
-    main:app
+# Set the entry point
+ENTRYPOINT ["python", "main.py"]
