@@ -1,13 +1,35 @@
 
-resource "google_cloud_run_v2_service" "default" {
-  name     = "cloudrun-service"
-  location = "us-central1"
-  ingress = "INGRESS_TRAFFIC_ALL"
+resource "google_cloud_run_v2_job" "default" {
+  name     = "${local.service_name}"
+  location = "europe-west1"
 
   template {
-    containers {
-      image = "gcr.io/${var.project}/dbt-service:latest"
-      args = ["--bucket","test-datachecker", "--filename", "test-bastien.txt",  "--content", "nothing"]
+    template {
+      containers {
+        image = "gcr.io/${var.project}/gcs-objcet-creator:latest"
+        args = ["--bucket", "${var.project}-${local.service_name}", "--filename", "test-bastien.txt",  "--content", "nothing"]
+      }
     }
   }
+  depends_on = [google_project_service.run]
+}
+
+
+# Generate the scheduler that will trigger the cloud run job
+resource "google_cloud_scheduler_job" "cloud_run_job" {
+  name = "${local.service_name}-cloud-run-job"
+  region = "${var.region}"
+  schedule = "* 6 * * *"
+  time_zone = "Europe/Paris"
+
+  http_target {
+    uri = "https://${var.region}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${var.project}/jobs/${local.service_name}:run"
+    http_method = "POST"
+    headers = {User-Agent: "Google-Cloud-Scheduler"}
+    oauth_token {
+      service_account_email = google_service_account.service_account.email
+      scope = "https://www.googleapis.com/auth/cloud-platform"
+    }
+  }
+  depends_on = [google_project_service.scheduler]
 }

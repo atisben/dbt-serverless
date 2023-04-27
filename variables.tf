@@ -3,18 +3,6 @@ variable "project" {
   description = "Google Cloud Platform Project ID"
 }
 
-variable "service_name_dbt" {
-    type = string
-    default = "dbt-service"
-    description = "Name of the service as rendered in the google cloud services"
-}
-
-variable "dbt_project_dir"{
-  type    = string
-  default = "project"
-  description = "Name of the dbt project initialized at the beggining of the project (default is project)"
-}
-
 variable "region" {
   default = "europe-west1"
   type    = string
