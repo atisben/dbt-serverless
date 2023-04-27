@@ -21,4 +21,5 @@ RUN dbt deps
 # Start the flask service
 WORKDIR ${APP_HOME}
 # Set the entry point
-ENTRYPOINT ["python", "main.py"]
+#ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["/bin/bash", "-c"]

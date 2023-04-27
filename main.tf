@@ -59,7 +59,7 @@ data "google_iam_policy" "private" {
 # Set permissions for the service account
 resource "google_project_iam_binding" "service_permissions" {
   for_each = toset([
-    "bigquery.dataEditor", "bigquery.jobUser", "storage.objectViewer"
+    "bigquery.dataEditor", "bigquery.jobUser", "storage.objectViewer", "run.invoker"
   ])
   project    = "${var.project}"
   role       = "roles/${each.key}"

@@ -6,8 +6,10 @@ resource "google_cloud_run_v2_job" "default" {
   template {
     template {
       containers {
-        image = "gcr.io/${var.project}/gcs-objcet-creator:latest"
-        args = ["--bucket", "${var.project}-${local.service_name}", "--filename", "test-bastien.txt",  "--content", "nothing"]
+        image = "gcr.io/${var.project}/dbt-service:latest" #TO MODIFY: change the name of the image if required
+        args = [
+          "dbt test --project-dir project --profiles-dir profiles && dbt run --models data_checker.*  --project-dir project --profiles-dir profiles"
+        ]
       }
     }
   }
