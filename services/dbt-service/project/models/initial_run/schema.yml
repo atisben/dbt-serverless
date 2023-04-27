@@ -1,0 +1,19 @@
+
+version: 2
+
+models:
+  - name: baseball_games
+    description: "List of baseball schedules"
+    columns:
+      - name: gameId
+        description: "The primary key for this table"
+
+
+  - name: long_games
+    description: "List of baseball games that took longer than 180 min"
+    columns:
+      - name: gameId
+        description: "The primary key for this table"
+
+
+    

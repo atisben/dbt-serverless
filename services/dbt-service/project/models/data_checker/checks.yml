@@ -1,0 +1,21 @@
+
+version: 2
+
+# These tests are made to run un source tables, not generated dbt models
+sources:
+
+# Checks can run on any table of the projects
+  - name: metadata_test #TO MODIFY: name that defines the group of tests
+    database: data-checker-dev # BigQuery project
+    schema: data_checker_input_data #TO MODIFY: dataset ID
+    tables:
+      - name: baseball_games #TO MODIFY: table ID
+        tests:
+          - consistent_casing: #TO MODIFY: name of the test to be used
+              column_name: status
+              key_field: gameId
+              alias: rcs_inncode_format_activities #TO MODIFY: Name of the exported result table 
+
+
+
+    

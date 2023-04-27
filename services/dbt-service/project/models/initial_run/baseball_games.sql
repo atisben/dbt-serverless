@@ -7,18 +7,9 @@
     Try changing "table" to "view" below
 */
 
-{{ config(materialized='table') }}
+{{ config(materialized='table', schema='input_data') }}
 
-with source_data as (
-
-    select 1 as id
-    union all
-    select null as id
-
-)
-
-select *
-from source_data
+SELECT * FROM `bigquery-public-data.baseball.schedules` LIMIT 1000
 
 /*
     Uncomment the line below to remove records with null `id` values

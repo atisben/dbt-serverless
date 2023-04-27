@@ -1,13 +1,13 @@
 main_profile:
   outputs:
     staging:
-      dataset: staging
+      dataset: data_checker
       job_execution_timeout_seconds: 300
       job_retries: 1
-      location: EU
+      location: US #TO MODIFY: replace it by your input and output datasets locations
       method: oauth
       priority: interactive
-      project: datachecker-test
+      project: data-checker-dev #TO MODIFY: replace it by your project ID
       threads: 4
       type: bigquery
   target: staging
