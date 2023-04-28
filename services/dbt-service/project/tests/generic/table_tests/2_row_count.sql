@@ -31,27 +31,29 @@ WITH row_count_table AS(
     {% endif %}
 )
 
-SELECT *, 
-       {% if min_value!=None and max_value!=None%}
-       IF(result > {{ max_value }} OR result < {{ min_value }},'FAIL','PASS') AS test_status
-       {% elif min_value==None and max_value!=None%}
-       IF(result > {{ max_value }},'FAIL','PASS') AS test_status
-       {% elif min_value!=None and max_value==None%}
-       IF(result < {{ min_value }},'FAIL','PASS') AS test_status
-       {% endif %}
+SELECT 
+  *, 
+  {% if min_value!=None and max_value!=None%}
+  IF(result > {{ max_value }} OR result < {{ min_value }},'FAIL','PASS') AS test_status
+  {% elif min_value==None and max_value!=None%}
+  IF(result > {{ max_value }},'FAIL','PASS') AS test_status
+  {% elif min_value!=None and max_value==None%}
+  IF(result < {{ min_value }},'FAIL','PASS') AS test_status
+  {% endif %}
 
 FROM
 (
-    SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
-        'row_count' AS test_name,
-        'the number of rows in the model should be between min_value and max_value.' AS test_rule,
-        'min_value = {{min_value}}, max_value = {{max_value}}, where_clause = {{where_clause}}' AS test_params,
-        CAST({% if min_value!=None %} {{ min_value }} {% else %} NULL {% endif %} AS NUMERIC) AS min_value ,
-        CAST({% if max_value!=None %} {{ max_value }} {% else %} NULL {% endif %} AS NUMERIC) AS max_value ,
-        CAST((SELECT row_count FROM row_count_table) AS NUMERIC) AS result
+  SELECT
+    TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+    'metadata_test' AS test_type,
+    '{{ model.database }}' AS project,
+    '{{ model.schema }}' AS dataset,
+    '{{ model.table }}' AS table,
+    '{{ column_name }}' AS column,
+    'row_count' AS test_name,
+    'the number of rows in the model should be between min_value and max_value' AS test_rule,
+    '{"min_value":{{min_value}}, "max_value":{{max_value}}}' AS test_params,
+    CAST((SELECT row_count FROM row_count_table) AS NUMERIC) AS result
+    NULL AS failing_rows
 )
 {%- endtest -%}

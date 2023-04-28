@@ -37,15 +37,16 @@ SELECT *,
 FROM
 (
     SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
-        'column_count' AS test_name,
-        'the number of columns in the model should be between min_value and max_value.' AS test_rule,
-        'min_value = {{min_value}}, max_value = {{max_value}}' AS test_params,
-        CAST({% if min_value!=None %} {{ min_value }} {% else %} NULL {% endif %} AS NUMERIC) AS min_value ,
-        CAST({% if max_value!=None %} {{ max_value }} {% else %} NULL {% endif %} AS NUMERIC) AS max_value ,
-        CAST({{ number_actual_columns }} AS NUMERIC) AS result
+      TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+      'metadata_test' AS test_type,
+      '{{ model.database }}' AS project,
+      '{{ model.schema }}' AS dataset,
+      '{{ model.table }}' AS table,
+      '{{ column_name }}' AS column,
+      'column_count' AS test_name,
+      'the number of columns in the model should be between min_value and max_value' AS test_rule,
+      '{"min_value":{{min_value}}, "max_value":{{max_value}}}' AS test_params,
+      CAST({{ number_actual_columns }} AS NUMERIC) AS result AS result,
+      NULL AS failing_rows
 )
 {% endtest %}

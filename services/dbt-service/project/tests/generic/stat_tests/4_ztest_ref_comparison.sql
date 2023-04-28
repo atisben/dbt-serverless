@@ -64,13 +64,12 @@ error_rows AS(
     WHERE ztest > {{score_threshold}}
 )
 
-SELECT *, 
-       IF(failing_rows > 0,'FAIL','PASS') AS test_status
+SELECT 
+  *, 
+  IF(failing_rows > 0,'FAIL','PASS') AS test_status
 FROM
 (
-    SELECT
-
-
+  SELECT
     TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
     'stat_test' AS test_type,
     '{{ model.database }}' AS project,
@@ -81,7 +80,7 @@ FROM
     'Distribution of the reference variable for the given key field should be identical to the distrubution of the tested variable' AS test_rule,
     '{"key_field":{{key_field}}, "metric_variable":{{metric_variable}}, "filter":{{filter}}, "ref_metric_variable":{{ref_metric_variable}}, "ref_key_field":{{ref_key_field}}, "ref_filter":{{ref_filter}}}' AS test_params,
     NULL AS result,
-    CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
+    CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows
 
 )
 {% endtest %}
