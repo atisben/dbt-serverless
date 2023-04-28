@@ -25,22 +25,23 @@ WITH unique_values AS (
     )
 )
 
-SELECT *, 
-       IF({% if max_value!=None %} result > {{ max_value }} {% else %} 1=2 {% endif %} OR {% if min_value != None %} result < {{ min_value }} {% else %} 1=2 {% endif %},'FAIL','PASS') AS test_status
+SELECT 
+    *, 
+    IF({% if max_value!=None %} result > {{ max_value }} {% else %} 1=2 {% endif %} OR {% if min_value != None %} result < {{ min_value }} {% else %} 1=2 {% endif %},'FAIL','PASS') AS test_status
 FROM
 (
     SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
+        TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+        'column_test' AS test_type,
+        '{{ model.database }}' AS project,
+        '{{ model.schema }}' AS dataset,
+        '{{ model.table }}' AS table,
         '{{ column_name }}' AS column,
         'unique_proportion' AS test_name,
         'proportion of unique values present in the column should be between a specified range [min_value(optional), max_value(optional)]' AS test_rule,
-        'min_value = {{min_value}}, max_value = {{max_value}}, where_clause = {{where_clause}}' AS test_params,
-        CAST({% if min_value!=None %} {{ min_value }} {% else %} NULL {% endif %} AS NUMERIC) AS min_value ,
-        CAST({% if max_value!=None %} {{ max_value }} {% else %} NULL {% endif %} AS NUMERIC) AS max_value ,
+        '{"min_value":{{min_value}}, "max_value":{{max_value}}, "where_clause":{{where_clause}}}' AS test_params,
         CAST((SELECT count FROM unique_values)/CAST(COUNT(*) AS NUMERIC) AS NUMERIC) AS result
+        NULL AS failing_rows
     FROM
         {{ model }}
     {%- if where_clause != None %}

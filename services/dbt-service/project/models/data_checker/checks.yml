@@ -15,7 +15,8 @@ sources:
               column_name: status
               key_field: gameId
               alias: rcs_inncode_format_activities #TO MODIFY: Name of the exported result table 
-
-
+          - table_recency_below: #TO MODIFY: name of the test to be used
+              minute: 100 #TO MODIFY
+              alias: check_table_recency #TO MODIFY
 
     

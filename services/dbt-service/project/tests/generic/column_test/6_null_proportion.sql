@@ -11,22 +11,23 @@
   {{ exceptions.raise_compiler_error("parameter 'min_value' should not be greater than parameter 'max_value'. Got: " ~ min_value  ~ " > " ~ max_value ) }}
 {% endif %}
 
-SELECT *, 
-       IF({% if max_value!=None %} result > {{ max_value }} {% else %} 1=2 {% endif %} OR {% if min_value != None %} result < {{ min_value }} {% else %} 1=2 {% endif %},'FAIL','PASS') AS test_status
+SELECT 
+    *, 
+    IF({% if max_value!=None %} result > {{ max_value }} {% else %} 1=2 {% endif %} OR {% if min_value != None %} result < {{ min_value }} {% else %} 1=2 {% endif %},'FAIL','PASS') AS test_status
 FROM
 (
     SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
+        TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+        'column_test' AS test_type,
+        '{{ model.database }}' AS project,
+        '{{ model.schema }}' AS dataset,
+        '{{ model.table }}' AS table,
         '{{ column_name }}' AS column,
         'null_proportion' AS test_name,
         'proportion of null values present in the column should be between a specified range' AS test_rule,
-        'min_value = {{min_value}}, max_value = {{max_value}}' AS test_params,
-        CAST({% if min_value!=None %} {{ min_value }} {% else %} NULL {% endif %} AS NUMERIC) AS min_value ,
-        CAST({% if max_value!=None %} {{ max_value }} {% else %} NULL {% endif %} AS NUMERIC) AS max_value ,
+        '{"min_value":{{min_value}}, "max_value":{{max_value}}}' AS test_params,
         CAST(SUM(IF({{ column_name }} IS NULL,1,0))/CAST(COUNT(*) AS NUMERIC) AS NUMERIC) AS result
+        NULL AS failing_rows
     FROM
         {{ model }}
 )
