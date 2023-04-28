@@ -22,21 +22,23 @@ WITH error_rows AS (
 )
 
 
-SELECT *, 
-       IF(failing_rows > 0,'FAIL','PASS') AS test_status
+SELECT 
+    *, 
+    IF(failing_rows > 0,'FAIL','PASS') AS test_status
 FROM
 (
     SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
-        NULL AS column,
+        TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+        'metadata_test' AS test_type,
+        '{{ model.database }}' AS project,
+        '{{ model.schema }}' AS dataset,
+        '{{ model.table }}' AS table,
+        '{{ column_name }}' AS column,
         'table_recency_below' AS test_name,
-        "Tables recency is below the estimate time in minutes" AS test_rule,
-        'minutes < {{minute}}' AS test_params,
-        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
+        'table recency is below the estimate time in minutes' AS test_rule,
+        '{"minute":{{minute}}}' AS test_params,
         NULL AS result
+        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows
         
 )
 
