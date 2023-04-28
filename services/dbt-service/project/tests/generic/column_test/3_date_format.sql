@@ -1,4 +1,4 @@
-{% test date_format(model, column_name, format ,key_field=None) %}
+{% test date_format(model, column_name, format) %}
 
 {{ config(
     enabled=true,
@@ -23,17 +23,17 @@ SELECT *,
 FROM
 (
     SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
-        '{{column_name}}' AS column,
+        TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+        'column_test' AS test_type,
+        '{{ model.database }}' AS project,
+        '{{ model.schema }}' AS dataset,
+        '{{ model.table }}' AS table,
+        '{{ column_name }}' AS column,
         'date_format' AS test_name,
-        'Every date should respect the provided date format' AS test_rule,
-        'format = {{format}}, key_field = {{key_field}}' AS test_params,
+        'every date should respect the provided date format' AS test_rule,
+        '{"format":{{format}}}' AS test_params,
+        NULL AS result,
         CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
-        '{{key_field}}' AS key_field,
-        ARRAY(SELECT {{key_field}} FROM error_rows) AS failed_key_field
 )
 
 

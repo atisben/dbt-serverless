@@ -1,16 +1,18 @@
-{% test compare_aggregate(model,
-                             model2,
-                             date_col1,
-                             date_col2,
-                             window1_start,
-                             window1_end,
-                             window2_start,
-                             window2_end,
-                             dimension_list,
-                             metric_list,
-                             aggregation,
-                             where_clause1=None,
-                             where_clause2=None) %}
+{% test compare_aggregate(
+    model,
+    model2,
+    date_col1,
+    date_col2,
+    window1_start,
+    window1_end,
+    window2_start,
+    window2_end,
+    dimension_list,
+    metric_list,
+    aggregation,
+    where_clause1=None,
+    where_clause2=None
+) %}
 
 {{ config(
     enabled=true,

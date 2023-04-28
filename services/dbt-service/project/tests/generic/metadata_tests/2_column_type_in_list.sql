@@ -34,17 +34,17 @@ SELECT *,
 FROM
 (
     SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
-        '{{column_name}}' AS column,
+        TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+        'metadata_test' AS test_type,
+        '{{ model.database }}' AS project,
+        '{{ model.schema }}' AS dataset,
+        '{{ model.table }}' AS table,
+        '{{ column_name }}' AS column,
         'column_type_in_list' AS test_name,
         'column type  should be in ({{ column_type_list | replace("\'","") | replace("\"","")}})' AS test_rule,
-        'column_name = {{column_name}}, column_type_list = {{column_type_list | replace("\'","") | replace("\"","")}}' AS test_params,
-        CAST(NULL AS NUMERIC) AS min_value ,
-        CAST(NULL AS NUMERIC) AS max_value ,
+        '{"column_name":{{column_name}}, "column_type_list": {{column_type_list | replace("\'","") | replace("\"","")}}}' AS test_params,
         CAST((SELECT IF(relation_column_type not in ('{{ column_type_list | join("', '") }}'),0,1) AS bin_res FROM test_data) AS NUMERIC) AS result,
+        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows
     FROM
         test_data
 )

@@ -26,18 +26,17 @@ SELECT *,
 FROM
 (
     SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
-        '{{column_name}}' AS column,
+        TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+        'stat_test' AS test_type,
+        '{{ model.database }}' AS project,
+        '{{ model.schema }}' AS dataset,
+        '{{ model.table }}' AS table,
+        '{{ column_name }}' AS column,
         'categorical_outliers' AS test_name,
-        "proportion of the same value in the specified column shouldn't be higher than max_proportion" AS test_rule,
-        'max_proportion = {{max_proportion}}' AS test_params,
-        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
-        ARRAY(SELECT AS STRUCT {{ column_name }},value_proportion FROM error_rows ) AS result
+        'proportion of the same value in the specified column shouldn not be higher than max_proportion' AS test_rule,
+        '{"max_proportion":{{max_proportion}}}' AS test_params,
+        NULL AS result,
+        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows
         
 )
-
-
 {% endtest %}

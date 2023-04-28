@@ -2,10 +2,10 @@
   model, 
   key_field, 
   metric_variable, 
+  filter = "", 
   ref_model, 
   ref_metric_variable, 
   ref_key_field, 
-  filter = "", 
   ref_filter = "",
   score_threshold = 2.5
   )%}
@@ -19,7 +19,7 @@
     error_if = "=1",
 ) }}
 
-WITH reference AS (
+WITH ref AS (
   SELECT 
     {{ref_key_field}},
     AVG({{ref_metric_variable}}) AS mean_ref,
@@ -45,10 +45,10 @@ error_rows AS(
         *
     FROM(
         SELECT  
-          IFNULL(test.{{key_field}}, reference.{{ref_key_field}}) AS {{key_field}},
+          IFNULL(test.{{key_field}}, ref.{{ref_key_field}}) AS {{key_field}},
           CASE
               WHEN test.{{key_field}} IS NULL THEN 5
-              WHEN reference.{{ref_key_field}} IS NULL THEN 5
+              WHEN ref.{{ref_key_field}} IS NULL THEN 5
               WHEN sigma_ref = 0 OR sigma_test= 0 OR sigma_ref IS NULL OR sigma_test IS NULL THEN 5
               WHEN mean_ref = 0 OR mean_test = 0 OR mean_ref IS NULL OR mean_test IS NULL THEN 5
               ELSE ABS((mean_ref - mean_test)/(SQRT(POW(sigma_ref, 2)+POW(sigma_test, 2))))
@@ -57,9 +57,9 @@ error_rows AS(
           mean_test,
           sigma_ref,
           sigma_test
-        FROM reference 
+        FROM ref 
         FULL OUTER JOIN test
-        ON test.{{key_field}} = reference.{{ref_key_field}}
+        ON test.{{key_field}} = ref.{{ref_key_field}}
     )
     WHERE ztest > {{score_threshold}}
 )
@@ -69,16 +69,19 @@ SELECT *,
 FROM
 (
     SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
-        '{{metric_variable}}' AS column,
-        'zscore_outliers' AS test_name,
-        "Distrib of {{metric_variable}} from {{model}} should follow the distrib of {{ref_metric_variable}} from {{ref_model}} for any value of {{key_field}}" AS test_rule,
-        'zscore-threshold = {{score_threshold}}' AS test_params,
-        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
-        ARRAY(SELECT AS STRUCT {{ key_field }} FROM error_rows ) AS result
-        
+
+
+    TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+    'stat_test' AS test_type,
+    '{{ model.database }}' AS project,
+    '{{ model.schema }}' AS dataset,
+    '{{ model.table }}' AS table,
+    '{{ column_name }}' AS column,
+    'ztest_distribution' AS test_name,
+    'Distribution of the reference variable for the given key field should be identical to the distrubution of the tested variable' AS test_rule,
+    '{"key_field":{{key_field}}, "metric_variable":{{metric_variable}}, "filter":{{filter}}, "ref_metric_variable":{{ref_metric_variable}}, "ref_key_field":{{ref_key_field}}, "ref_filter":{{ref_filter}}}' AS test_params,
+    NULL AS result,
+    CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
+
 )
 {% endtest %}
