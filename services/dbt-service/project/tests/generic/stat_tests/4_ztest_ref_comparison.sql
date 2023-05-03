@@ -1,11 +1,11 @@
 {% test ztest_ref_comparison(
   model, 
   key_field, 
-  metric_variable, 
-  filter = "", 
+  metric_variable,
   ref_model, 
-  ref_metric_variable, 
+  ref_metric_variable,  
   ref_key_field, 
+  filter = "", 
   ref_filter = "",
   score_threshold = 2.5
   )%}

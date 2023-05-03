@@ -35,16 +35,17 @@ SELECT *,
 FROM
 (
     SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
+        TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+        'row_test' AS test_type,
+        '{{ model.database }}' AS project,
+        '{{ model.schema }}' AS dataset,
+        '{{ model.table }}' AS table,
         '{{column_name}}' AS column,
         'consistent_casing' AS test_name,
         'Every value in the column should have consistent casing' AS test_rule,
-        'key_field = {{key_field}}' AS test_params,
+        '{"key_field": {{key_field}}}' AS test_params,
+        NULL AS result,
         CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
-        '{{key_field}}' AS key_field,
-        ARRAY(SELECT {{key_field}} FROM error_rows) AS failed_key_field
+        
     )
  {%- endtest -%}

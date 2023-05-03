@@ -27,7 +27,6 @@ SELECT *,
 FROM
 (
     SELECT
-
       TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
       'row_test' AS test_type,
       '{{ model.database }}' AS project,
