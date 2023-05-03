@@ -1,4 +1,4 @@
-{% test consistent_casing(model, column_name, key_field=None) %}
+{% test consistent_casing(model, column_name) %}
 
 {{ config(
     enabled=true,
@@ -28,8 +28,6 @@ FROM
 WHERE LOWER({{column_name}}) IN (SELECT value FROM test_data)
 {% endset %}
 
-error_rows as({{check_query}})
-
 
 SELECT *, 
        IF(failing_rows > 0,'FAIL','PASS') AS test_status
@@ -44,9 +42,9 @@ FROM
         '{{column_name}}' AS column,
         'consistent_casing' AS test_name,
         'Every value in the column should have consistent casing' AS test_rule,
-        '{"key_field": {{key_field}}}' AS test_params,
+        NULL AS test_params,
         NULL AS result,
-        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
+        CAST((SELECT COUNT(*) FROM ({{check_query}})) AS NUMERIC) AS failing_rows,
         CAST(("""{{check_query}}""") AS STRING) AS query
         
     )
