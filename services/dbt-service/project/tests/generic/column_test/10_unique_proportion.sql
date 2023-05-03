@@ -11,19 +11,30 @@
   {{ exceptions.raise_compiler_error("parameter 'min_value' should not be greater than parameter 'max_value'. Got: " ~ min_value  ~ " > " ~ max_value ) }}
 {% endif %}
 
-WITH unique_values AS (
-    SELECT COUNT(*) AS count 
-    FROM (
-        SELECT {{ column_name }}
-        FROM {{ model }}
-        {%- if where_clause != None %}
-        WHERE 
-            {{where_clause}}
-        {%endif%}
-        GROUP BY {{ column_name }}
-        HAVING COUNT(*)=1
+{% set check_query %} 
+    SELECT
+        count/(
+            SELECT CAST(COUNT(*) AS NUMERIC) FROM {{ model }}
+            {%- if where_clause != None %}
+            WHERE {{where_clause}}
+            {%endif%}
+        ) AS result
+    FROM(
+        SELECT 
+            COUNT(*) AS count 
+        FROM (
+            SELECT {{ column_name }}
+            FROM {{ model }}
+            {%- if where_clause != None %}
+            WHERE 
+                {{where_clause}}
+            {%endif%}
+            GROUP BY {{ column_name }}
+            HAVING COUNT(*)=1
+        )
     )
-)
+
+{% endset %}
 
 SELECT 
     *, 
@@ -40,13 +51,9 @@ FROM
         'unique_proportion' AS test_name,
         'proportion of unique values present in the column should be between a specified range [min_value(optional), max_value(optional)]' AS test_rule,
         '{"min_value":{{min_value}}, "max_value":{{max_value}}, "where_clause":{{where_clause}}}' AS test_params,
-        CAST((SELECT count FROM unique_values)/CAST(COUNT(*) AS NUMERIC) AS NUMERIC) AS result
-        NULL AS failing_rows
-    FROM
-        {{ model }}
-    {%- if where_clause != None %}
-    WHERE 
-        {{where_clause}}
-    {%endif%}
+        CAST(({{check_query}}) AS NUMERIC) AS result,
+        NULL AS failing_rows,
+        CAST(("""{{check_query}}""") AS STRING) AS query
+
 )
 {% endtest %}

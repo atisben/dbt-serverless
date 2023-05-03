@@ -47,6 +47,7 @@ FROM
       'the number of columns in the model should be between min_value and max_value' AS test_rule,
       '{"min_value":{{min_value}}, "max_value":{{max_value}}}' AS test_params,
       CAST({{ number_actual_columns }} AS NUMERIC) AS result AS result,
-      NULL AS failing_rows
+      NULL AS failing_rows,
+      NULL AS query
 )
 {% endtest %}

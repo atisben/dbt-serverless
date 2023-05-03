@@ -22,14 +22,14 @@
   {{ exceptions.raise_compiler_error("You have to provide at least one of max_value or min_value parameter") }}
 {% endif %}
 
-WITH row_count_table AS(
+{% set check_query %} 
     SELECT COUNT(*) AS row_count
     FROM 
         {{ model }}
     {%- if where_clause!=None-%}
     WHERE {{ where_clause }}
     {% endif %}
-)
+{% endset %}
 
 SELECT 
   *, 
@@ -53,7 +53,8 @@ FROM
     'row_count' AS test_name,
     'the number of rows in the model should be between min_value and max_value' AS test_rule,
     '{"min_value":{{min_value}}, "max_value":{{max_value}}}' AS test_params,
-    CAST((SELECT row_count FROM row_count_table) AS NUMERIC) AS result
-    NULL AS failing_rows
+    CAST((SELECT row_count FROM ({{check_query}})) AS NUMERIC) AS result
+    NULL AS failing_rows,
+    CAST(("""{{check_query}}""") AS STRING) AS query
 )
 {%- endtest -%}

@@ -1,17 +1,11 @@
 {% test compare_aggregate(
     model,
     model2,
-    date_col1,
-    date_col2,
-    window1_start,
-    window1_end,
-    window2_start,
-    window2_end,
     dimension_list,
     metric_list,
     aggregation,
-    where_clause1=None,
-    where_clause2=None
+    where_clause_ref=None,
+    where_clause_test=None
 ) %}
 
 {{ config(
@@ -21,46 +15,60 @@
     error_if = "=1",
 ) }}
 
--- Compare a list of metrics between two portions of the same table 
-WITH current_window_data AS(
-    SELECT {{dimension_list | join(',')}},
+{% set check_query %}
+
+SELECT  
+    *
+FROM(
+    SELECT {{dimension_list | join(',')}}
     {% for metric in metric_list %}
-    {{aggregation}}({{metric}}) AS {{aggregation}}_{{metric}} {% if not loop.last %},{% endif %}
+        {{aggregation}}({{metric}}) AS {{aggregation}}_{{metric}} {% if not loop.last %},{% endif %}
     {% endfor %}
     FROM {{model}}
-    WHERE CAST({{date_col1}} AS TIMESTAMP) BETWEEN TIMESTAMP('{{window1_start}}') AND TIMESTAMP('{{window1_end}}')
-    {% if where_clause1 != None %}
-    AND {{where_clause1}}
+    {% if where_clause_ref != None %}
+        WHERE {{where_clause_ref}}
     {% endif %}
     GROUP BY {{dimension_list | join(',')}}
-),
-
-compare_window_data AS(
-    SELECT {{dimension_list | join(',')}},
+) AS ref
+FULL OUTER JOIN(
+    SELECT {{dimension_list | join(',')}}
     {% for metric in metric_list %}
-    {{aggregation}}({{metric}}) AS {{aggregation}}_{{metric}} {% if not loop.last %},{% endif %}
+        {{aggregation}}({{metric}}) AS {{aggregation}}_{{metric}} {% if not loop.last %},{% endif %}
     {% endfor %}
     FROM {{model2}}
-    WHERE CAST({{date_col2}} AS TIMESTAMP) BETWEEN TIMESTAMP('{{window2_start}}') AND TIMESTAMP('{{window2_end}}')
-    {% if where_clause2 != None %}
-    AND {{where_clause2}}
+    {% if where_clause_test != None %}
+        AND {{where_clause_test}}
     {% endif %}
     GROUP BY {{dimension_list | join(',')}}
+) AS test
+USING {{dimension_list | join(',')}}
+WHERE TRUE
+{% for metric in metric_list %}
+    AND ref.{{aggregation}}_{{metric}} != test.{{aggregation}}_{{metric}}
+{% endfor %} 
+
+
+{% endset %}
+
+SELECT 
+  *, 
+  IF(failing_rows > 0,'FAIL','PASS') AS test_status
+FROM
+(
+  SELECT
+    TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+    'stat_test' AS test_type,
+    '{{ model.database }}' AS project,
+    '{{ model.schema }}' AS dataset,
+    '{{ model.table }}' AS table,
+    '{{dimension_list | join(",")}}' AS column,
+    'compare_aggregates' AS test_name,
+    'Compare an aggregation between the metrics of identical dimensions' AS test_rule,
+    '{"dimension_list":{{dimension_list}}, "metric_list":{{metric_list}}, "aggregation":{{aggregation}}, "where_clause_ref":{{where_clause_ref}}, "where_clause_test":{{where_clause_test}}}' AS test_params,
+    NULL AS result,
+    CAST((SELECT COUNT(*) FROM ({{check_query}})) AS NUMERIC) AS failing_rows,
+    CAST(("""{{check_query}}""") AS STRING) AS query
+
 )
-    SELECT
-        {% for dim in dimension_list %}
-        {{dim}},
-        {% endfor %}
-        {% for metric in metric_list %}
-        current_window_data.{{aggregation}}_{{metric}} AS {{aggregation}}_{{metric}}_window1 ,
-        {% endfor %}
-
-        {% for metric in metric_list %}
-        compare_window_data.{{aggregation}}_{{metric}} AS {{aggregation}}_{{metric}}_window2 ,
-        {% endfor %}
-        "PASS" AS test_status
-    FROM
-        current_window_data INNER JOIN compare_window_data USING({{dimension_list | join(',')}})
-
 
 {% endtest %}

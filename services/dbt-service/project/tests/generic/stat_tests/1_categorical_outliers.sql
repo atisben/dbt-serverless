@@ -7,8 +7,9 @@
     error_if = "=1",
 ) }}
 
-WITH error_rows AS (
-  SELECT *
+{% set check_query %} 
+  SELECT 
+    *
   FROM 
   ( 
     SELECT {{column_name}},
@@ -18,7 +19,7 @@ WITH error_rows AS (
     GROUP BY {{ column_name }}
   )
   WHERE value_proportion > {{max_proportion}}
-)
+{% endset %}
 
 
 SELECT *, 
@@ -36,7 +37,7 @@ FROM
         'proportion of the same value in the specified column shouldn not be higher than max_proportion' AS test_rule,
         '{"max_proportion":{{max_proportion}}}' AS test_params,
         NULL AS result,
-        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows
-        
+        CAST((SELECT COUNT(*) FROM ({{check_query}})) AS NUMERIC) AS failing_rows,
+        CAST(("""{{check_query}}""") AS STRING) AS query
 )
 {% endtest %}

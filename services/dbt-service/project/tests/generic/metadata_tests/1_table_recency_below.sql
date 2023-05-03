@@ -9,7 +9,7 @@
 
 
 
-WITH error_rows AS (
+{% set check_query %} 
     SELECT  
         COUNT(1) AS failing_values,
     FROM(
@@ -19,7 +19,7 @@ WITH error_rows AS (
             WHERE table_name = "{{model.table}}"
     )
     WHERE diff > {{minute}}
-)
+{% endset %}
 
 
 SELECT 
@@ -38,7 +38,8 @@ FROM
         'table recency is below the estimate time in minutes' AS test_rule,
         '{"minute":{{minute}}}' AS test_params,
         NULL AS result,
-        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows
+        CAST((SELECT COUNT(*) FROM ({{check_query}})) AS NUMERIC) AS failing_rows,
+        CAST(("""{{check_query}}""") AS STRING) AS query
         
 )
 

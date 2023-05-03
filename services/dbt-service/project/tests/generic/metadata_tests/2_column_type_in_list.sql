@@ -44,7 +44,8 @@ FROM
         'column type  should be in ({{ column_type_list | replace("\'","") | replace("\"","")}})' AS test_rule,
         '{"column_name":{{column_name}}, "column_type_list": {{column_type_list | replace("\'","") | replace("\"","")}}}' AS test_params,
         CAST((SELECT IF(relation_column_type not in ('{{ column_type_list | join("', '") }}'),0,1) AS bin_res FROM test_data) AS NUMERIC) AS result,
-        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows
+        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
+        NULL AS query
     FROM
         test_data
 )

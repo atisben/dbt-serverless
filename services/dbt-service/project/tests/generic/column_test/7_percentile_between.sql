@@ -21,6 +21,10 @@
   {{ exceptions.raise_compiler_error("You have to provide at least one of max_value or min_value parameter") }}
 {% endif %}
 
+{% set check_query %} 
+  SELECT PERCENTILE_CONT({{column_name}}, {{p}}) OVER() FROM {{ model }} LIMIT 1
+{% endset %}
+
 SELECT 
   *, 
   IF({% if max_value!=None %} result > {{ max_value }} {% else %} 1=2 {% endif %} OR {% if min_value != None %} result < {{ min_value }} {% else %} 1=2 {% endif %},'FAIL','PASS') AS test_status
@@ -36,7 +40,8 @@ SELECT
     'percentile_between' AS test_name,
     'the p-percentile value of the column should be between a specified range' AS test_rule,
     '{"min_value":{{min_value}}, "max_value":{{max_value}}, "p":{{p}}}' AS test_params,
-    CAST((SELECT PERCENTILE_CONT({{column_name}}, {{p}}) OVER() FROM {{ model }} LIMIT 1) AS NUMERIC) AS result
-    NULL AS failing_rows
+    CAST(({{check_query}}) AS NUMERIC) AS result,
+    NULL AS failing_rows,
+    CAST(("""{{check_query}}""") AS STRING) AS query
 )
 {% endtest %}
