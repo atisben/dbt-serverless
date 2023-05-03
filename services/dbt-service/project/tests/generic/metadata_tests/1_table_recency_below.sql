@@ -37,7 +37,7 @@ FROM
         'table_recency_below' AS test_name,
         'table recency is below the estimate time in minutes' AS test_rule,
         '{"minute":{{minute}}}' AS test_params,
-        NULL AS result
+        NULL AS result,
         CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows
         
 )

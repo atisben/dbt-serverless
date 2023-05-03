@@ -18,6 +18,10 @@ error_rows AS(
     SELECT * FROM desired_format
 )
 
+{% set check_query %} 
+SELECT COUNT(*) FROM error_rows
+{% endset %}
+
 SELECT *, 
        IF(failing_rows > 0,'FAIL','PASS') AS test_status
 FROM
@@ -33,7 +37,9 @@ FROM
         'every date should respect the provided date format' AS test_rule,
         '{"format":{{format}}}' AS test_params,
         NULL AS result,
-        CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
+        CAST(({{check_query}}) AS NUMERIC) AS failing_rows,
+        CAST(("""{{check_query}}""") AS STRING) AS query
+
 )
 
 

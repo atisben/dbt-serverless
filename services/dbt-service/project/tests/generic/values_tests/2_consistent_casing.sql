@@ -7,9 +7,6 @@
     error_if = "=1",
 ) }}
 
-{%- if key_field==None  %}
-  {{ exceptions.raise_compiler_error("You have to specify the key_field that is a unique identifier for rows in the table to be able to identify the potential failing rows. Got key_field = " ~ key_field) }}
-{% endif %}
 
 with test_data as (
     SELECT LOWER(distinct_values) AS value,
@@ -23,11 +20,15 @@ with test_data as (
     HAVING occurences > 1
  ),
 
+{% set check_query %} 
+SELECT 
+    * 
+FROM 
+{{ model }} 
+WHERE LOWER({{column_name}}) IN (SELECT value FROM test_data)
+{% endset %}
 
-error_rows as(
- SELECT * FROM {{ model }}
- WHERE LOWER({{column_name}}) IN (SELECT value FROM test_data)
- )
+error_rows as({{check_query}})
 
 
 SELECT *, 
@@ -46,6 +47,7 @@ FROM
         '{"key_field": {{key_field}}}' AS test_params,
         NULL AS result,
         CAST((SELECT COUNT(*) FROM error_rows) AS NUMERIC) AS failing_rows,
+        CAST(("""{{check_query}}""") AS STRING) AS query
         
     )
  {%- endtest -%}
