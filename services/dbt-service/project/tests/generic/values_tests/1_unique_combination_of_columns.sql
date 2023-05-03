@@ -1,4 +1,4 @@
-{% test unique_combination_of_columns(model, combination_of_columns=None, key_field=None) %}
+{% test unique_combination_of_columns(model, combination_of_columns=None) %}
 
 {{ config(
     enabled=true,
@@ -9,10 +9,6 @@
 
 {%- if combination_of_columns==None  %}
   {{ exceptions.raise_compiler_error("You have to specify at least one column on wich you want to check for duplicates. Got combination_of_columns = " ~ combination_of_columns ) }}
-{% endif %}
-
-{%- if key_field==None  %}
-  {{ exceptions.raise_compiler_error("You have to specify the key_field that is a unique identifier for rows in the table to be able to identify the potential failing rows. Got key_field = " ~ key_field) }}
 {% endif %}
 
 {%- if combination_of_columns!=None %}
@@ -31,19 +27,17 @@ SELECT *,
 FROM
 (
     SELECT
-        TIMESTAMP(CURRENT_DATETIME('Europe/Paris')) AS timestamp,
-        '{{model['database']}}' AS project,
-        '{{model['schema']}}' AS dataset,
-        '{{model['table']}}' AS table,
-        'unique_combination_of_columns' AS test_name,
-        'No duplicates should be found on the combination of columns. Got combination: {{ columns_csv }}' AS test_rule,
-        'combination_of_columns = {{combination_of_columns | replace("\'","") | replace("\"","")}}, key_field = {{key_field}}' AS test_params,
-        CAST(COUNT(*) AS NUMERIC) AS failing_rows,
-        '{{key_field}}' AS key_field,
-        ARRAY(SELECT {{key_field}} FROM duplicated_rows) AS failed_key_field
-    FROM
-        duplicated_rows
+
+      TIMESTAMP(CURRENT_DATETIME('UTC')) AS timestamp,
+      'row_test' AS test_type,
+      '{{ model.database }}' AS project,
+      '{{ model.schema }}' AS dataset,
+      '{{ model.table }}' AS table,
+      NULL AS column,
+      'unique_combination_of_columns' AS test_name,
+      'no duplicates should be found on the combination of columns. Got combination: {{ columns_csv }}' AS test_rule,
+      '{"combination_of_columns":{{combination_of_columns | replace("\'","") | replace("\"","")}}, key_field = {{key_field}}}' AS test_params,
+      NULL AS result,
+      CAST((SELECT COUNT(*) FROM duplicated_rows) AS NUMERIC) AS failing_rows
 )
-
-
 {% endtest %}
