@@ -24,7 +24,7 @@ FROM(
     {% for metric in metric_list %}
         {{aggregation}}({{metric}}) AS {{aggregation}}_{{metric}} {% if not loop.last %},{% endif %}
     {% endfor %}
-    FROM {{model}}
+    FROM {{model_ref}}
     {% if where_clause_ref != None %}
         WHERE {{where_clause_ref}}
     {% endif %}
@@ -35,7 +35,7 @@ FULL OUTER JOIN(
     {% for metric in metric_list %}
         {{aggregation}}({{metric}}) AS {{aggregation}}_{{metric}} {% if not loop.last %},{% endif %}
     {% endfor %}
-    FROM {{model2}}
+    FROM {{model}}
     {% if where_clause_test != None %}
         AND {{where_clause_test}}
     {% endif %}
