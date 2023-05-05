@@ -38,7 +38,7 @@ FROM
         "Values should not include one of the provided characters" AS test_rule,
         '{"char_list" = {{char_list | replace("\"","") | replace("\'","")}}}' AS test_params,
         NULL AS result,
-        CAST((SELECT COUNT(*) FROM ({{query_check}})) AS NUMERIC) AS failing_rows,
+        CAST((SELECT COUNT(*) FROM ({{check_query}})) AS NUMERIC) AS failing_rows,
         CAST(("""{{check_query}}""") AS STRING) AS query
 
 )

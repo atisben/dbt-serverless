@@ -36,4 +36,8 @@ tests:
 
 
 vars:
-  project_vars: "{{ read_yaml('./vars/project_vars.yml') }}"
+  #TO MODIFY: Modify the vars according to your project
+  today: "{{modules.datetime.datetime.now().strftime('%Y-%m-%d')}}"
+  today_minus_3: "{{(modules.datetime.datetime.now() - modules.datetime.timedelta(3)).strftime('%Y-%m-%d')}}"
+  today_minus_3_paris: "{{modules.pytz.timezone('Europe/Paris').localize(modules.datetime.datetime.now() - modules.datetime.timedelta(3)).strftime('%Y-%m-%d')}}"
+  today_minus_10_years: "{{(modules.datetime.datetime.now() - modules.datetime.timedelta(3650)).strftime('%Y-%m-%d')}}"

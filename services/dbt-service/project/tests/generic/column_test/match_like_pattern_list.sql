@@ -47,9 +47,9 @@ FROM
         '{{column_name}}' AS column,
         'match_like_pattern_list' AS test_name,
         "Every value in the column should match the like patterns provided. Got like_pattern_list =[ {{like_pattern_list | join(', ') }} ]" AS test_rule,
-        '{"like_pattern_list" = {{like_pattern_list | replace("\"","") | replace("\'","")}}, "match_on" = {{match_on}}, "where_clause" = {{where_clause}}}' AS test_params,
+        '{"like_pattern_list" = {{like_pattern_list | replace("\"","") | replace("\'","")}}, "match_on" = {{match_on}}}' AS test_params,
         NULL AS result,
-        CAST((SELECT COUNT(*) FROM {{check_query}}) AS NUMERIC) AS failing_rows,
+        CAST((SELECT COUNT(*) FROM ({{check_query}})) AS NUMERIC) AS failing_rows,
         CAST(("""{{check_query}}""") AS STRING) AS query
     )
 

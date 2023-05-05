@@ -44,7 +44,7 @@ FROM
         '{{column_name}}' AS column,
         'values_between' AS test_name,
         "Every value should fall in the range provided i.e greater  or equal to min_value and less or equal than max_value." AS test_rule,
-        '{"min_value" = {{min_value}}, "max_value" = {{max_value}}, "where_clause" = {{where_clause}}}' AS test_params,
+        '{"min_value" = {{min_value}}, "max_value" = {{max_value}}}' AS test_params,
         NULL AS result,
         CAST((SELECT COUNT(*) FROM ({{check_query}})) AS NUMERIC) AS failing_rows,
         CAST(("""{{check_query}}""") AS STRING) AS query

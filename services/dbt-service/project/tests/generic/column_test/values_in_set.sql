@@ -36,7 +36,7 @@ FROM
         '{{column_name}}' AS column,
         'values_in_set' AS test_name,
         'Every value should fall in the set of allowed values provided' AS test_rule,
-        '{"value_set" = {{value_set | replace("\'","") | replace("\"","")}}, "where_clause" = {{where_clause}}}' AS test_params,
+        '{"value_set" = {{value_set | replace("\'","") | replace("\"","")}}}' AS test_params,
         NULL AS result,
         CAST((SELECT COUNT(*) FROM ({{query_check}})) AS NUMERIC) AS failing_rows,
         CAST(("""{{check_query}}""") AS STRING) AS query

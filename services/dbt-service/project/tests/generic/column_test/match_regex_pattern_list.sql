@@ -46,7 +46,7 @@ FROM
         '{{column_name}}' AS column,
         'match_regex_pattern_list' AS test_name,
         "Every value in the column should match the regex patterns provided. " AS test_rule,
-        '{"regex_pattern_list" = {{regex_pattern_list | replace("\"","") | replace("\'","")}}, "match_on" = {{match_on}}, "where_clause" = {{where_clause}}}' AS test_params,
+        '{"regex_pattern_list" = {{regex_pattern_list | replace("\"","") | replace("\'","")}}, "match_on" = {{match_on}}}' AS test_params,
         CAST((SELECT COUNT(*) FROM ({{check_query}})) AS NUMERIC) AS failing_rows,
         CAST(("""{{check_query}}""") AS STRING) AS query
     )

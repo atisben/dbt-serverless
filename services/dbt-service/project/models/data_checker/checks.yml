@@ -10,12 +10,38 @@ sources:
     schema: data_checker_input_data #TO MODIFY: dataset ID
     tables:
       - name: baseball_games #TO MODIFY: table ID
-        tests:
-          - consistent_casing: #TO MODIFY: name of the test to be used
+        tests: #TO MODIFY: adapt the content of the tests to your project
+          - table_recency_below:
+              minute: 100
+              alias: check_table_recency
+          - average_between:
+              column_name: duration_minutes
+              min_value: 100
+              max_value: 200
+          - consistent_casing:
               column_name: status
-              alias: chack_table_casing #TO MODIFY: Name of the exported result table 
-          - table_recency_below: #TO MODIFY: name of the test to be used
-              minute: 100 #TO MODIFY
-              alias: check_table_recency #TO MODIFY
+              alias: chack_table_casing
+          - not_null_proportion:
+              column_name: dayNight
+              min_value: 0
+              max_value: 0.1
+          - column_count:
+              min_value: 5
+              max_value: 15
+          - row_count:
+              min_value: 999
+              max_value: 1001
+          - table_recency_below:
+              minute: 60
+          - match_like_pattern_list:
+              column_name: dayNight
+              like_pattern_list: 
+              - D
+              - N
+              match_on: "any"
+              where_clause: startTime BETWEEN '{{ var("today_minus_10_years") }}' AND '{{ var("today") }}'
+
+
+          
 
     

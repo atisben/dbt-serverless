@@ -7,8 +7,12 @@
     error_if = "=1",
 ) }}
 
-
-with test_data as (
+{% set check_query %} 
+SELECT 
+    * 
+FROM 
+{{ model }} 
+WHERE LOWER({{column_name}}) IN (SELECT value FROM (
     SELECT LOWER(distinct_values) AS value,
            COUNT(*) AS occurences 
     FROM (
@@ -18,14 +22,7 @@ with test_data as (
     )
     GROUP BY value
     HAVING occurences > 1
- ),
-
-{% set check_query %} 
-SELECT 
-    * 
-FROM 
-{{ model }} 
-WHERE LOWER({{column_name}}) IN (SELECT value FROM test_data)
+))
 {% endset %}
 
 

@@ -64,7 +64,7 @@ FROM
     '{{dimension_list | join(",")}}' AS column,
     'compare_aggregates' AS test_name,
     'Compare an aggregation between the metrics of identical dimensions' AS test_rule,
-    '{"dimension_list":{{dimension_list}}, "metric_list":{{metric_list}}, "aggregation":{{aggregation}}, "where_clause_ref":{{where_clause_ref}}, "where_clause_test":{{where_clause_test}}}' AS test_params,
+    '{"dimension_list":{{dimension_list}}, "metric_list":{{metric_list}}, "aggregation":{{aggregation}}}' AS test_params,
     NULL AS result,
     CAST((SELECT COUNT(*) FROM ({{check_query}})) AS NUMERIC) AS failing_rows,
     CAST(("""{{check_query}}""") AS STRING) AS query

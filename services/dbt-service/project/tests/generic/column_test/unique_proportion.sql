@@ -50,7 +50,7 @@ FROM
         '{{ column_name }}' AS column,
         'unique_proportion' AS test_name,
         'proportion of unique values present in the column should be between a specified range [min_value(optional), max_value(optional)]' AS test_rule,
-        '{"min_value":{{min_value}}, "max_value":{{max_value}}, "where_clause":{{where_clause}}}' AS test_params,
+        '{"min_value":{{min_value}}, "max_value":{{max_value}}}' AS test_params,
         CAST(({{check_query}}) AS NUMERIC) AS result,
         NULL AS failing_rows,
         CAST(("""{{check_query}}""") AS STRING) AS query

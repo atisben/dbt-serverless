@@ -33,8 +33,8 @@ FROM
         'not_null_proportion' AS test_name,
         'proportion of non-null values present in the column should be between a specified range' AS test_rule,
         '{"min_value":{{min_value}}, "max_value":{{max_value}}}' AS test_params,
-        CAST(({query_check}) AS NUMERIC) AS result
-        NULL AS failing_rows
+        CAST(({{check_query}}) AS NUMERIC) AS result,
+        NULL AS failing_rows,
         CAST(("""{{check_query}}""") AS STRING) AS query
 )
 {% endtest %}
